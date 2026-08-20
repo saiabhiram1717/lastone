@@ -1,0 +1,1359 @@
+﻿<!DOCTYPE html>
+<!-- saved from url=(0058)file:///C:/Users/saiab/Downloads/ai_studio_code%20(4).html -->
+<html lang="en"><head><meta charset="utf-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAD FOOD | Dual-Auth Partner Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #060405;
+            --primary: #ff1b2e;
+            --secondary: #a1131f;
+            --accent: #ff4d5a;
+            --success: #8dd96f;
+            --warning: #ff4d4d;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text: #f3f0ec;
+            --text-dim: #ae9a8b;
+            --text-soft: rgba(243, 240, 236, 0.78);
+            --placeholder: rgba(243, 240, 236, 0.70);
+            --card-shadow: 0 14px 45px 0 rgba(0, 0, 0, 0.85);
+            --panel-bg: rgba(255,255,255,0.04);
+            --border-soft: rgba(255, 255, 255, 0.08);
+        }
+
+        body[data-theme="light"] {
+            --bg: #f2f2f2;
+            --primary: #d8000c;
+            --secondary: #7a0e14;
+            --accent: #ff4d5a;
+            --success: #2a7a3b;
+            --warning: #d84315;
+            --glass: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --text: #1f1f23;
+            --text-dim: #5f6368;
+            --text-soft: rgba(31, 31, 35, 0.82);
+            --placeholder: rgba(31, 31, 35, 0.55);
+            --card-shadow: 0 14px 45px 0 rgba(0, 0, 0, 0.12);
+            --panel-bg: rgba(255,255,255,0.85);
+            --border-soft: rgba(0, 0, 0, 0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; min-height: 100vh; background-image: radial-gradient(circle at top left, rgba(255, 27, 46, 0.12), transparent 25%), radial-gradient(circle at bottom right, rgba(255, 77, 90, 0.08), transparent 18%); }
+        body[data-theme="light"] { background-image: radial-gradient(circle at top left, rgba(216, 21, 27, 0.08), transparent 25%), radial-gradient(circle at bottom right, rgba(255, 77, 90, 0.05), transparent 18%); }
+        body[data-theme="light"] nav { background: rgba(255,255,255,0.92); }
+        body[data-theme="light"] .nav-menu a { color: var(--text-dim); }
+        body[data-theme="light"] .nav-menu a.active { color: var(--primary); }
+        body[data-theme="light"] .nav-menu .login-link { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); }
+        body[data-theme="light"] .about-wrapper { background: rgba(255,255,255,0.95); border-color: rgba(0,0,0,0.08); box-shadow: 0 25px 70px rgba(0,0,0,0.12); }
+        body[data-theme="light"] .about-title { color: #b66f3f; }
+        body[data-theme="light"] .about-section h3 { color: #222; }
+        body[data-theme="light"] .about-section p { color: #444; }
+        body[data-theme="light"] .about-section p strong { color: var(--accent); }
+        h1, h2, h3, h4, h5, .logo, .neon-btn, .role-card h3 { font-family: 'Poppins', sans-serif; }
+        .brand-badge { display: inline-block; margin-top: 0.35rem; color: rgba(255,255,255,0.7); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+
+        /* Background */
+        .bg-glow { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+        .blob { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(255, 27, 46, 0.28) 0%, transparent 65%); border-radius: 50%; filter: blur(120px); animation: move 18s infinite alternate; }
+        @keyframes move { from { transform: translate(-15%, -15%) scale(1); } to { transform: translate(70%, 70%) scale(1.05); } }
+
+        /* UI Elements */
+        .glass-card { background: var(--glass); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 2rem; box-shadow: var(--card-shadow); transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease, background 0.35s ease; }
+        .glass-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65); border-color: rgba(255,255,255,0.14); background: rgba(255,255,255,0.08); }
+        .neon-btn { background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; color: white; padding: 12px 28px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 22px rgba(255, 29, 44, 0.45); position: relative; overflow: hidden; }
+        .neon-btn::before { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.06); opacity: 0; transition: opacity 0.25s ease; }
+        .neon-btn:hover { transform: translateY(-2px); box-shadow: 0 0 36px rgba(255, 77, 90, 0.65); }
+        .neon-btn:hover::before { opacity: 1; }
+        .neon-btn:active { transform: translateY(1px); }
+        .neon-btn:disabled { background: #1b1619; box-shadow: none; cursor: not-allowed; opacity: 0.65; }
+
+        .theme-toggle-btn { margin-right: 0.75rem; background: transparent; color: var(--text); border: 1px solid var(--border-soft); padding: 10px 16px; border-radius: 14px; font-weight: 600; transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease; }
+        .theme-toggle-btn:hover { background: rgba(255,255,255,0.08); }
+
+        .role-tabs { display: flex; justify-content: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+        .role-tab { border: none; background: rgba(255,255,255,0.08); color: var(--text-soft); cursor: pointer; font-weight: 700; padding: 14px 20px; border-radius: 999px; min-width: 140px; transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease; }
+        .role-tab.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; box-shadow: 0 16px 40px rgba(255, 27, 46, 0.2); transform: translateY(-1px); }
+        .role-tab:hover { background: rgba(255,255,255,0.12); }
+
+        .login-method-toggle { display: flex; }
+        .login-method-btn { border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.05); color: var(--text-soft); padding: 10px 18px; border-radius: 999px; cursor: pointer; font-weight: 700; transition: all 0.25s ease; }
+        .login-method-btn.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border-color: transparent; }
+        .login-method-btn:hover { background: rgba(255,255,255,0.12); }
+
+        .otp-wrapper { display: flex; gap: 10px; justify-content: space-between; margin-top: 0.75rem; }
+        .otp-input { width: 48px; height: 52px; border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; background: rgba(255,255,255,0.08); color: var(--text); text-align: center; font-size: 1.1rem; font-weight: 700; }
+        .otp-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 12px rgba(255,77,90,0.2); }
+
+        .role-card { transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease; cursor: pointer; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); border-radius: 28px; padding: 2rem 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; min-height: 220px; }
+        .role-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.16); box-shadow: 0 30px 80px rgba(0,0,0,0.25); }
+        .role-card.selected { transform: translateY(-6px); border-color: rgba(255, 77, 90, 0.6); box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35); background: rgba(255,255,255,0.08); }
+        .role-card h3 { color: var(--text); margin: 0; font-size: 1.15rem; }
+        .role-card p { color: var(--text-soft); text-align: center; line-height: 1.7; max-width: 260px; margin: 0; }
+        .role-icon { width: 48px; height: 48px; border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; display: grid; place-items: center; font-size: 1.35rem; }
+        .login-role-grid { margin-bottom: 1.5rem; }
+
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; margin-top: 2rem; }
+        .hero-stats, .footer-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-top: 2rem; width: 100%; }
+        .hero-stat, .footer-stat { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); border-radius: 999px; padding: 1rem 1.2rem; color: var(--text); font-size: 0.95rem; font-weight: 600; min-width: 150px; text-align: center; }
+        .hero-stat strong, .footer-stat strong { display: block; color: white; font-size: 1.1rem; margin-bottom: 0.15rem; }
+        .info-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 2rem; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2); transition: transform 0.3s ease, border-color 0.3s ease; }
+        .info-card:hover { transform: translateY(-6px); border-color: rgba(255,77,90,0.4); }
+        .info-card-icon { width: 48px; height: 48px; margin: 0 auto 1rem; border-radius: 12px; display: grid; place-items: center; background: rgba(255,77,90,0.15); color: var(--accent); font-size: 1.3rem; }
+        .info-card h3 { margin-bottom: 0.75rem; color: var(--text); }
+        .info-card p { color: var(--text-dim); line-height: 1.7; }
+        .about-wrapper { background: rgba(0, 0, 0, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 2.5rem; box-shadow: 0 25px 70px rgba(0,0,0,0.45); margin-top: 2rem; }
+        .about-title { text-align: center; font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 2rem; letter-spacing: 0.25em; text-transform: uppercase; color: #d3a169; }
+        .about-section { margin-bottom: 2rem; }
+        .about-section h3 { margin-bottom: 0.75rem; color: var(--primary); font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.08em; }
+        .about-section p { color: var(--text); line-height: 1.9; font-size: 0.98rem; }
+        .about-section p strong { color: var(--accent); }
+        .about-section + .about-section { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 1.75rem; }
+
+        .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.08); }
+        .footer-card h4 { color: var(--text); margin-bottom: 0.8rem; }
+        .footer-card p, .footer-card a { color: var(--text-dim); text-decoration: none; display: block; margin-bottom: 0.5rem; }
+        .footer-social { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+        .footer-social a.social-icon { width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,0.12); border-radius: 50%; color: var(--text); background: rgba(255,255,255,0.06); text-decoration: none; transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease; }
+        .footer-social a.social-icon:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.18); background: rgba(255,255,255,0.12); }
+
+        .contact-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-top: 2rem; }
+        .contact-panel { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 2rem; box-shadow: 0 20px 50px rgba(0,0,0,0.18); }
+        .contact-panel h3 { margin-bottom: 1rem; color: var(--text); }
+        .contact-panel p { color: var(--text-dim); line-height: 1.7; margin-bottom: 1.25rem; }
+        .contact-panel label { display: block; margin-bottom: 0.65rem; color: var(--text-dim); font-size: 0.85rem; font-weight: 600; }
+        .contact-panel input, .contact-panel select, .contact-panel textarea { width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 14px 16px; color: var(--text); margin-bottom: 1rem; outline: none; transition: border-color 0.25s ease, background 0.25s ease; }
+        .contact-panel input:focus, .contact-panel select:focus, .contact-panel textarea:focus { border-color: var(--accent); background: rgba(255,255,255,0.12); }
+        .contact-cards { display: grid; gap: 1rem; }
+        .contact-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 1.5rem; }
+        .contact-card h4 { margin-bottom: 0.75rem; color: var(--text); }
+        .contact-card a, .contact-card p { color: var(--text-dim); text-decoration: none; display: block; margin-bottom: 0.5rem; }
+        .contact-action { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 1rem; padding: 0.9rem 1.2rem; border-radius: 14px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.08); color: var(--text); cursor: pointer; text-decoration: none; transition: transform 0.2s ease, background 0.2s ease; }
+        .contact-action:hover { transform: translateY(-2px); background: rgba(255,255,255,0.12); }
+
+        .password-field { position: relative; }
+
+        .hero-section { text-align: left; padding: 6rem 0 3rem; max-width: 920px; margin: 0 auto; }
+        .hero-content { max-width: 700px; }
+        .hero-title { font-size: clamp(3rem, 7vw, 5rem); line-height: 1.05; margin-bottom: 1rem; }
+        .hero-description { color: var(--text-dim); max-width: 560px; margin: 0 0 2rem; font-size: 1.05rem; line-height: 1.8; }
+        .section-title { text-align: center; margin-bottom: 3rem; }
+        .section-title-large { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 1rem; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+        .feature-detail { margin-top: 2rem; display: none; }
+        .feature-detail h3 { margin-bottom: 0.75rem; }
+        .feature-detail p { color: var(--text-dim); line-height: 1.8; }
+        .section-intro { text-align: center; padding: 3rem 0; }
+        .section-description { color: var(--text-dim); max-width: 680px; margin: 0 auto; font-size: 1rem; line-height: 1.8; }
+        .full-width-action { width: 100%; margin-top: 0.5rem; }
+        .auth-card { max-width: 680px; margin: 0 auto; }
+        .auth-title { margin-bottom: 0.75rem; text-align: center; }
+        .auth-subtitle { text-align: center; color: var(--text-dim); margin-bottom: 2rem; font-size: 0.95rem; }
+        .login-method-toggle { display: none; margin-bottom: 1.5rem; justify-content: center; gap: 0.75rem; }
+        .secondary-link { color: var(--secondary); font-weight: 700; text-decoration: none; }
+        .compact-btn { margin-top: 1rem; padding: 10px 18px; }
+        .vehicle-select { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 10px; padding: 12px 15px; color: white; }
+        .delivery-note { font-size: 0.85rem; color: var(--text-dim); display: none; margin-top: 1rem; }
+        .conditional-field { display: none; }
+        .auth-submit { width: 100%; margin-top: 1rem; }
+        .auth-footer { text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-dim); }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .dashboard-role { color: var(--secondary); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; }
+        .terminate-btn { background: var(--accent); }
+        .activity-log { font-size: 0.85rem; color: var(--text-dim); }
+        .approval-card { max-width: 400px; text-align: center; }
+        .approval-spinner { font-size: 3rem; color: var(--secondary); margin-bottom: 1rem; }
+        .approval-copy { color: var(--text-dim); margin-top: 10px; }
+        .approved-content { display: none; }
+        .approved-icon { font-size: 4rem; color: var(--success); margin-bottom: 1rem; }
+        .approved-copy { margin: 1rem 0; }
+        .generated-password { background: #000; padding: 10px; font-family: monospace; color: var(--secondary); font-size: 1.2rem; }
+        .approval-submit { width: 100%; margin-top: 1.5rem; }
+
+        /* Navigation */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; position: sticky; top: 0; z-index: 100; background: rgba(10, 8, 10, 0.92); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+        .logo { font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 10px; color: var(--accent); cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; }
+        .brand-icon { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; background: rgba(255, 77, 90, 0.12); color: var(--accent); }
+        .brand-icon svg { width: 20px; height: 20px; fill: currentColor; }
+        .nav-menu { display: flex; gap: 1.75rem; align-items: center; }
+        .nav-menu a { color: var(--text-soft); text-decoration: none; font-weight: 600; transition: color 0.25s ease, background 0.25s ease; padding: 10px 0; }
+        .nav-menu a:hover { color: #fff; }
+        .nav-menu a.active { color: #ff4b5b; }
+        .nav-menu .login-link { padding: 10px 16px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); }
+        .nav-menu .login-link:hover { background: rgba(255,255,255,0.12); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .page { display: none; opacity: 0; transform: translateY(20px); transition: opacity 0.45s ease, transform 0.45s ease; }
+        .page.active { display: block; opacity: 1; transform: translateY(0); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Form Inputs */
+        .form-group { margin-bottom: 1.2rem; transition: opacity 0.25s ease, transform 0.25s ease; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-dim); font-size: 0.85rem; font-weight: 600; }
+        input, select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.08); padding: 14px 16px; color: var(--text); border-radius: 16px; outline: none; transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease; }
+        input::placeholder, textarea::placeholder, select::placeholder { color: var(--placeholder); }
+        input:hover, select:hover { background: rgba(255,255,255,0.08); }
+        input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 20px rgba(255, 77, 90, 0.25); }
+
+        /* Dashboard */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-box .value { font-size: 1.8rem; font-weight: 800; color: var(--secondary); }
+        .dashboard-main { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
+        @media (max-width: 900px) { .dashboard-main { grid-template-columns: 1fr; } }
+
+        /* Overlay */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; -webkit-backdrop-filter: blur(15px); backdrop-filter: blur(15px); }
+        .overlay.active { display: flex; }
+
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translate(-50%, 100px); padding: 1rem 2rem; border-radius: 50px; background: var(--primary); color: white; opacity: 0; transition: transform 0.4s ease, opacity 0.4s ease; z-index: 2000; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+        .site-footer { background: rgba(255,255,255,0.05); border-top: 1px solid rgba(255,255,255,0.1); padding: 1.5rem 0; }
+        .footer-inner { max-width: 1200px; margin: 0 auto; padding: 0 2rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; justify-content: space-between; color: var(--text-soft); }
+        .footer-brand h4 { margin: 0 0 0.5rem; color: var(--text); font-size: 1rem; }
+        .footer-brand p { margin: 0; font-size: 0.95rem; }
+        .footer-links { display: flex; flex-wrap: wrap; gap: 1rem; }
+        .footer-links a { color: var(--text-soft); text-decoration: none; font-size: 0.95rem; }
+        .footer-links a:hover { color: var(--text); }
+        .footer-copy { font-size: 0.9rem; color: var(--text-dim); }
+
+        .subtitle-shimmer { animation: shimmerText 1s ease infinite; }
+        @keyframes shimmerText { 0% { opacity: 0.65; filter: brightness(1); } 50% { opacity: 1; filter: brightness(1.2); } 100% { opacity: 0.65; filter: brightness(1); } }
+
+        body.loading { overflow: hidden; }
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 4000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            background: var(--bg);
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+            overflow: hidden;
+        }
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .loading-card {
+            width: min(92vw, 420px);
+            padding: 2rem;
+            border-radius: 24px;
+            text-align: center;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--card-shadow);
+            -webkit-backdrop-filter: blur(18px);
+            backdrop-filter: blur(18px);
+            position: relative;
+            z-index: 2;
+        }
+        .loading-logo {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 1rem;
+            border-radius: 20px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            box-shadow: 0 12px 30px rgba(255, 27, 46, 0.25);
+        }
+        .loading-logo svg { width: 32px; height: 32px; fill: currentColor; }
+        .loading-title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text);
+            margin-bottom: 0.35rem;
+        }
+        .loading-subtitle {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+            margin-bottom: 1.15rem;
+        }
+        .loading-bar {
+            height: 8px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.12);
+            margin: 1rem 0 0.75rem;
+        }
+        .loading-bar span {
+            display: block;
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            animation: loadingRun 1.4s ease-in-out infinite;
+        }
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-top: 0.6rem;
+        }
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: loadingDot 1s ease-in-out infinite;
+        }
+        .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes loadingRun {
+            0% { width: 0; opacity: 0.7; }
+            50% { width: 70%; opacity: 1; }
+            100% { width: 100%; opacity: 0.9; }
+        }
+        @keyframes loadingDot {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.6; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="loading">
+
+    <div class="loading-screen" id="loading-screen" aria-live="polite">
+        <div class="loading-card">
+            <div class="loading-logo" aria-hidden="true">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M32 2C21 13 18 24 18 34c0 10 8 18 18 18s18-8 18-18c0-10-3-21-14-32 0 0-2 5-8 7-6-2-8-7-8-7z"/>
+                    <path d="M26 32c-1 0-2 .9-2 2v18c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V34c0-1.1-.9-2-2-2H26zm2 4h2v14h-2V36zm4 0h2v14h-2V36zm4 0h2v14h-2V36z"/>
+                </svg>
+            </div>
+            <h2 class="loading-title">Mad Food</h2>
+            <p class="loading-subtitle">Preparing your bright, clean partner experience…</p>
+            <div class="loading-bar"><span></span></div>
+            <div class="loading-dots"><span></span><span></span><span></span></div>
+        </div>
+    </div>
+
+    <div class="bg-glow"><div class="blob"></div></div>
+
+    <nav>
+        <div class="logo" onclick="navigateTo('landing')">
+            <span class="brand-icon" aria-hidden="true">
+                <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mad Food logo">
+                    <path d="M32 2C21 13 18 24 18 34c0 10 8 18 18 18s18-8 18-18c0-10-3-21-14-32 0 0-2 5-8 7-6-2-8-7-8-7z"/>
+                    <path d="M26 32c-1 0-2 .9-2 2v18c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V34c0-1.1-.9-2-2-2H26zm2 4h2v14h-2V36zm4 0h2v14h-2V36zm4 0h2v14h-2V36z"/>
+                </svg>
+            </span>
+            MAD FOOD
+        </div>
+        <div class="nav-menu">
+            <button type="button" class="theme-toggle-btn" onclick="toggleTheme()">Switch to Bright</button>
+            <a href="#home" data-target="landing" onclick="navigateTo('landing')">Home</a>
+            <a href="#about" data-target="about" onclick="navigateTo('about')">About</a>
+            <a href="#features" data-target="roles" onclick="navigateTo('roles')">Features</a>
+            <a href="#contact" data-target="contact" onclick="navigateTo('contact')">Contact</a>
+            <a href="#login" class="login-link" data-target="auth" onclick="navigateTo('auth')">Login</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Landing -->
+        <section id="landing" class="page active">
+            <div class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Mad Food ·<br>Partner Portal</h1>
+                    <p class="hero-description">One platform connecting Restaurants, Delivery Partners, and Customers.</p>
+                    <button class="neon-btn" onclick="navigateTo('auth')">Get Started</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Role Selection -->
+        <section id="roles" class="page">
+            <h2 class="section-title">Core <span class="text-primary">Features</span> for Mad Food Partners</h2>
+            <div class="feature-grid">
+                <div id="feature-tracking" class="glass-card role-card" onclick="selectFeature('tracking')">
+                    <div class="role-icon"><i class="fas fa-bolt"></i></div>
+                    <h3>Real-time Tracking</h3>
+                    <p>Live delivery status, order flow, and demand visibility across every route.</p>
+                </div>
+                <div id="feature-analytics" class="glass-card role-card" onclick="selectFeature('analytics')">
+                    <div class="role-icon"><i class="fas fa-chart-line"></i></div>
+                    <h3>Analytics Dashboard</h3>
+                    <p>Instant performance insights, sales trends, and kitchen efficiency metrics.</p>
+                </div>
+                <div id="feature-payments" class="glass-card role-card" onclick="selectFeature('payments')">
+                    <div class="role-icon"><i class="fas fa-wallet"></i></div>
+                    <h3>Multiple Payments</h3>
+                    <p>Fast settlements, flexible billing, and secure partner payouts in one place.</p>
+                </div>
+            </div>
+            <div id="feature-detail" class="glass-card feature-detail">
+                <h3 id="feature-detail-title">Feature Details</h3>
+                <p id="feature-detail-description">Select a feature card above to see what it does and how it helps your partner operations.</p>
+            </div>
+        </section>
+        <section id="about" class="page">
+            <div class="about-wrapper">
+                <h2 class="about-title">About Us</h2>
+                <div class="about-section">
+                    <h3>Who we are.</h3>
+                    <p>There’s nothing cookie-cutter about Mad Food. Not our kitchens. Not our menu. And definitely not the way we live life. Around here, we don’t settle for anything less than food we’re proud to serve. And we don’t just clock in. Not when we can also become our best, make friends, and have fun while we’re at it. <strong>We’re the food company that lives life unboxed.</strong></p>
+                </div>
+                <div class="about-section">
+                    <h3>What we’re about.</h3>
+                    <p>At Mad Food, we don’t just make food. We make people happy. Mad Food was built on the belief that every partner experience should be special, and we carry that belief into everything we do. With more than years of experience under our belts, we understand how to best serve our customers through tried and true service principles: <strong>We create food we’re proud to serve and deliver it fast, with a smile.</strong></p>
+                </div>
+                <div class="about-section">
+                    <h3>Where we come from.</h3>
+                    <p>In 1958, two brothers borrowed $600 from their mom to open a food place. They named it Mad Food because their sign only had room for eight letters. How profound! Today we keep building on that same energy: bold ideas, fast service, and a partner community that runs on trust and flavor.</p>
+                </div>
+            </div>
+            <div class="footer-grid">
+                <div class="footer-card">
+                    <h4>Mad Food</h4>
+                    <p>Partner Portal</p>
+                    <span class="brand-badge">Powered by Alight Motion</span>
+                </div>
+                <div class="footer-card">
+                    <h4>About</h4>
+                    <a href="#">Team</a>
+                    <a href="#">Careers</a>
+                </div>
+                <div class="footer-card">
+                    <h4>Contact</h4>
+                    <p>help@madfood.com</p>
+                    <p>+91 12345 67890</p>
+                </div>
+                <div class="footer-card">
+                    <h4>Follow</h4>
+                    <div class="footer-social">
+                        <a href="#" class="social-icon">f</a>
+                        <a href="#" class="social-icon">x</a>
+                        <a href="#" class="social-icon"></a>
+                        <a href="#" class="social-icon"></a>
+                        <a href="#" class="social-icon">▶</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="page">
+            <div class="section-intro">
+                <h2 class="section-title-large">Contact <span class="text-primary">Support</span></h2>
+                <p class="section-description">Reach out for support, feedback, or to request a call from our partner success team.</p>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-panel">
+                    <h3>Request a call.</h3>
+                    <p>Give us some info so the right person can get back to you.</p>
+                    <div class="form-group"><label>First name</label><input type="text" placeholder="First name"></div>
+                    <div class="form-group"><label>Last name</label><input type="text" placeholder="Last name"></div>
+                    <div class="form-group"><label>Job title</label><input type="text" placeholder="Job title"></div>
+                    <div class="form-group"><label>Email</label><input type="email" placeholder="Email"></div>
+                    <div class="form-group"><label>Phone</label><input type="tel" placeholder="Phone"></div>
+                    <div class="form-group"><label>Country/Region</label><select><option>United States</option><option>India</option><option>United Kingdom</option><option>Other</option></select></div>
+                    <div class="form-group"><label>Product interest</label><input type="text" placeholder="Product interest"></div>
+                    <button class="neon-btn full-width-action">Contact me</button>
+                </div>
+                <div class="contact-cards">
+                    <div class="contact-card">
+                        <h4>Give us a call.</h4>
+                        <p>1-800-664-9073</p>
+                        <a href="#">Not in the US? Find your local office</a>
+                        <a href="#">Get billing and tech support</a>
+                        <a href="#">Manage billing, licenses, and renewals in Your Account</a>
+                    </div>
+                    <div class="contact-card">
+                        <h4>Chat with us.</h4>
+                        <p>Get product info, login help, and live chat with an agent.</p>
+                        <a class="contact-action" href="#">Let's chat</a>
+                    </div>
+                    <div class="contact-card">
+                        <h4>Leave us some feedback.</h4>
+                        <p>Good or bad, we love to hear it all.</p>
+                        <a class="contact-action" href="#">Send feedback</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Auth Page -->
+        <section id="auth" class="page">
+            <div class="glass-card auth-card">
+                <h2 id="auth-title" class="auth-title">Agent Login</h2>
+                <p id="auth-subtitle" class="auth-subtitle">Select your role and then enter your email and password to access the partner portal.</p>
+                <div class="role-tabs" id="auth-role-tabs">
+                    <button type="button" class="role-tab active" data-role="customer" onclick="setAuthRole('customer')">Customer Login</button>
+                    <button type="button" class="role-tab" data-role="restaurant" onclick="setAuthRole('restaurant')">Kitchen Partner</button>
+                    <button type="button" class="role-tab" data-role="delivery" onclick="setAuthRole('delivery')">Fleet Agent</button>
+                    <button type="button" class="role-tab" data-role="admin" onclick="setAuthRole('admin')">Admin Login</button>
+                </div>
+                <form onsubmit="handleAuth(event)">
+                    <div class="login-method-toggle" id="login-method-toggle">
+                        <button type="button" class="login-method-btn active" data-method="email" onclick="setLoginMethod('email')">Email</button>
+                        <button type="button" class="login-method-btn" data-method="phone" onclick="setLoginMethod('phone')">Phone</button>
+                    </div>
+                    <div class="form-group" id="email-group">
+                        <label>Email</label>
+                        <input type="email" id="email" placeholder="agent@madfood.com">
+                    </div>
+                    <div class="form-group" id="pass-group">
+                        <label>Secret Access Key</label>
+                        <input type="password" id="password" placeholder="••••••••">
+                    </div>
+                    <div class="form-group conditional-field" id="forgot-password-wrapper">
+                        <a href="javascript:void(0)" onclick="handleForgotPassword()" class="secondary-link">Forgot password?</a>
+                    </div>
+                    <div class="form-group conditional-field" id="confirm-group">
+                        <label>Confirm Secret Key</label>
+                        <input type="password" id="confirm-password" placeholder="••••••••">
+                    </div>
+                    <div class="form-group conditional-field" id="phone-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="phone" placeholder="Enter phone number">
+                    </div>
+                    <div class="form-group conditional-field" id="otp-group">
+                        <label>OTP</label>
+                        <div class="otp-wrapper">
+                            <input class="otp-input" maxlength="1" inputmode="numeric" oninput="moveFocus(this, 0)">
+                            <input class="otp-input" maxlength="1" inputmode="numeric" oninput="moveFocus(this, 1)">
+                            <input class="otp-input" maxlength="1" inputmode="numeric" oninput="moveFocus(this, 2)">
+                            <input class="otp-input" maxlength="1" inputmode="numeric" oninput="moveFocus(this, 3)">
+                            <input class="otp-input" maxlength="1" inputmode="numeric" oninput="moveFocus(this, 4)">
+                            <input class="otp-input" maxlength="1" inputmode="numeric" oninput="moveFocus(this, 5)">
+                        </div>
+                        <button type="button" class="neon-btn compact-btn" id="send-otp-btn" onclick="requestOTP()">Send OTP</button>
+                    </div>
+                    <div class="form-group conditional-field" id="address-group">
+                        <label>Address</label>
+                        <input type="text" id="address" placeholder="123 Main St, City">
+                    </div>
+
+                    <div class="form-group conditional-field" id="restaurant-name-group">
+                        <label>Restaurant Name</label>
+                        <input type="text" id="restaurant-name" placeholder="MadFood Bistro">
+                    </div>
+                    <div class="form-group conditional-field" id="restaurant-contact-group">
+                        <label>Contact Number</label>
+                        <input type="tel" id="restaurant-contact" placeholder="+91 98765 43210">
+                    </div>
+                    <div class="form-group conditional-field" id="restaurant-cuisine-group">
+                        <label>Cuisine Type</label>
+                        <select id="restaurant-cuisine">
+                            <option value="Multi-Cuisine">Multi-Cuisine</option>
+                            <option value="Italian">Italian</option>
+                            <option value="Chinese">Chinese</option>
+                            <option value="Mexican">Mexican</option>
+                            <option value="Indian">Indian</option>
+                            <option value="Continental">Continental</option>
+                        </select>
+                    </div>
+                    <div class="form-group conditional-field" id="restaurant-fssai-group">
+                        <label>FSSAI License Number</label>
+                        <input type="text" id="restaurant-fssai" placeholder="FSSAI-1234567890">
+                    </div>
+
+                    <div class="form-group conditional-field" id="name-group">
+                        <label>Agent Alias (Full Name)</label>
+                        <input type="text" id="fullname" placeholder="Agent Smith">
+                    </div>
+                    <div id="delivery-group" class="conditional-field">
+                        <div class="form-group">
+                            <label>Vehicle Type</label>
+                            <select id="vehicle-type" class="vehicle-select">
+                                <option value="Bike">Bike</option>
+                                <option value="Car">Car</option>
+                                <option value="Van">Van</option>
+                                <option value="Scooter">Scooter</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Vehicle Number</label>
+                            <input type="text" id="vehicle-number" placeholder="KA-01-AB-1234">
+                        </div>
+                        <div class="form-group">
+                            <label>Driving License Number</label>
+                            <input type="text" id="license-number" placeholder="DL-1234567890">
+                        </div>
+                        <div class="form-group">
+                            <label>RC Upload</label>
+                            <input type="file" id="rc-upload" accept="image/*,.pdf">
+                        </div>
+                        <div class="form-group">
+                            <label>Profile Photo</label>
+                            <input type="file" id="photo-upload" accept="image/*">
+                        </div>
+                        <p id="delivery-note" class="delivery-note">No password needed now. You'll receive one after admin approval.</p>
+                    </div>
+
+                    <button type="submit" class="neon-btn auth-submit" id="submit-btn">Authorize</button>
+                </form>
+
+                <p class="auth-footer">
+                    <span id="toggle-text">First time in the Verse?</span> 
+                    <a href="javascript:void(0)" onclick="toggleAuthMode()" id="toggle-link" class="secondary-link">Join Network</a>
+                </p>
+            </div>
+        </section>
+
+        <!-- Dashboard -->
+        <section id="dashboard" class="page">
+            <div class="dashboard-header">
+                <div>
+                    <h1 id="db-user">System Access Granted</h1>
+                    <p id="db-role" class="dashboard-role"></p>
+                </div>
+                <button class="neon-btn terminate-btn" onclick="location.reload()">Terminate</button>
+            </div>
+            <div class="stats-grid" id="db-stats"></div>
+            <div class="dashboard-main">
+                <div class="glass-card"><h3>Neural Growth</h3><canvas id="dbChart" height="200"></canvas></div>
+                <div class="glass-card"><h3>Live Activity</h3><div id="db-logs" class="activity-log"></div></div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <h4>Mad Food</h4>
+                <p>Partner Portal • Powered by Alight Motion</p>
+            </div>
+            <div class="footer-stats">
+                <div class="footer-stat"><strong>50+</strong> Restaurants</div>
+                <div class="footer-stat"><strong>100+</strong> Delivery Partners</div>
+                <div class="footer-stat"><strong>10,000+</strong> Happy Customers</div>
+                <div class="footer-stat"><strong>4.8</strong> Average Rating</div>
+            </div>
+            <div class="footer-links">
+                <a href="#landing" onclick="navigateTo('landing')">Home</a>
+                <a href="#about" onclick="navigateTo('about')">About</a>
+                <a href="#features" onclick="navigateTo('roles')">Features</a>
+                <a href="#contact" onclick="navigateTo('contact')">Contact</a>
+            </div>
+            <div class="footer-copy">© 2026 Mad Food. All rights reserved.</div>
+        </div>
+    </footer>
+
+    <!-- Admin Approval Overlay -->
+    <div class="overlay" id="approval-overlay">
+        <div class="glass-card approval-card">
+            <div id="approving">
+                <i class="fas fa-circle-notch fa-spin approval-spinner"></i>
+                <h3>Verifying Credentials...</h3>
+                <p class="approval-copy">Our AI Admin is reviewing your application to MAD FOOD.</p>
+            </div>
+            <div id="approved" class="approved-content">
+                <i class="fas fa-shield-check approved-icon"></i>
+                <h2>Access Approved</h2>
+                <p class="approved-copy">Your partner identity is validated. Use this key to enter the portal:</p>
+                <div class="glass-card generated-password" id="gen-pass"></div>
+                <button class="neon-btn approval-submit" onclick="closeApproval()">Enter Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Syncing...</div>
+
+    <script>
+        const roleLabels = {
+            customer: 'Customer',
+            restaurant: 'Kitchen Partner',
+            delivery: 'Fleet Agent',
+            admin: 'Admin'
+        };
+        const adminAccount = {
+            email: 'admin@madfood.com',
+            password: 'Admin@12345',
+            phone: '9876543210',
+            name: 'Mad Foods Admin',
+            role: 'admin'
+        };
+        let currentRole = 'customer';
+        let authMode = 'login'; // login | signup
+        let loginMethod = 'email';
+        let otpSent = false;
+        let generatedOtp = '';
+        let currentUser = null;
+
+        function navigateTo(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById(id);
+            if (!target) return;
+            target.classList.add('active');
+            document.querySelectorAll('.nav-menu a').forEach(link => link.classList.toggle('active', link.dataset.target === id));
+            target.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function applyTheme(theme) {
+            const btn = document.querySelector('.theme-toggle-btn');
+            const isLight = theme === 'light';
+            document.body.setAttribute('data-theme', isLight ? 'light' : 'night');
+            if (btn) {
+                btn.textContent = isLight ? 'Switch to Dark' : 'Switch to Bright';
+                btn.setAttribute('aria-pressed', isLight);
+            }
+            localStorage.setItem('mad_theme', isLight ? 'light' : 'night');
+        }
+
+        function toggleTheme() {
+            const current = document.body.getAttribute('data-theme');
+            const isLight = current !== 'light';
+            document.body.setAttribute('data-theme', isLight ? 'light' : 'night');
+            const btn = document.querySelector('.theme-toggle-btn');
+            if (btn) {
+                btn.textContent = isLight ? 'Switch to Dark' : 'Switch to Bright';
+                btn.setAttribute('aria-pressed', isLight);
+            }
+            localStorage.setItem('mad_theme', isLight ? 'light' : 'night');
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('mad_theme');
+            const btn = document.querySelector('.theme-toggle-btn');
+            const useLight = saved !== 'night' && saved !== 'dark';
+            document.body.setAttribute('data-theme', useLight ? 'light' : 'night');
+            if (btn) {
+                btn.textContent = useLight ? 'Switch to Dark' : 'Switch to Bright';
+                btn.setAttribute('aria-pressed', useLight);
+            }
+        }
+
+        function selectRole(r) {
+            currentRole = r;
+            document.querySelectorAll('.role-card').forEach(card => card.classList.remove('selected'));
+            const selectedCard = document.getElementById(`role-${r}`);
+            if (selectedCard) selectedCard.classList.add('selected');
+            document.querySelectorAll('.role-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.role === r));
+            navigateTo('auth');
+            updateAuthUI();
+        }
+
+        function setAuthRole(role) {
+            currentRole = role;
+            if (role === 'admin') {
+                loginMethod = 'email';
+                authMode = 'login';
+            }
+            document.querySelectorAll('.role-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.role === role));
+            updateAuthUI();
+        }
+
+        function setLoginMethod(method) {
+            loginMethod = method;
+            document.querySelectorAll('.login-method-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.method === method));
+            if (method === 'phone') {
+                document.getElementById('email-group').style.display = 'none';
+                document.getElementById('phone-group').style.display = 'block';
+                document.getElementById('pass-group').style.display = 'none';
+                document.getElementById('otp-group').style.display = 'block';
+            } else {
+                document.getElementById('email-group').style.display = 'block';
+                document.getElementById('phone-group').style.display = 'none';
+                document.getElementById('pass-group').style.display = 'block';
+                document.getElementById('otp-group').style.display = 'none';
+            }
+        }
+
+        function moveFocus(el, idx) {
+            if (!el.value) return;
+            const inputs = Array.from(document.querySelectorAll('.otp-input'));
+            if (idx < inputs.length - 1) {
+                inputs[idx + 1].focus();
+            }
+        }
+
+        function getEnteredOtp() {
+            return Array.from(document.querySelectorAll('.otp-input')).map(input => input.value).join('');
+        }
+
+        function resetOtpInputs() {
+            document.querySelectorAll('.otp-input').forEach(input => input.value = '');
+        }
+
+        async function apiFetch(url, options = {}) {
+            const fetchOptions = {
+                method: options.method || 'GET',
+                headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
+            };
+            if (options.body) {
+                fetchOptions.body = JSON.stringify(options.body);
+            }
+
+            const res = await fetch(url, fetchOptions);
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(data.error || 'Server request failed.');
+            }
+            return data;
+        }
+
+        async function requestOTP() {
+            const rawPhone = document.getElementById('phone').value;
+            const phone = normalizePhone(rawPhone);
+            if (!phone) return showToast('Enter your phone number first.', 'error');
+            if (!/^[0-9]{7,20}$/.test(phone)) return showToast('Enter a valid phone number.', 'error');
+            generatedOtp = String(Math.floor(100000 + Math.random() * 900000));
+            otpSent = true;
+            resetOtpInputs();
+            document.getElementById('send-otp-btn').innerText = 'OTP Sent';
+            document.getElementById('send-otp-btn').disabled = true;
+            showToast(`OTP sent to ${phone}`, 'success');
+            setTimeout(() => {
+                document.getElementById('send-otp-btn').innerText = 'Send OTP';
+                document.getElementById('send-otp-btn').disabled = false;
+            }, 30000);
+        }
+
+        function selectFeature(feature) {
+            const config = {
+                tracking: {
+                    title: 'Real-time Tracking',
+                    description: 'Track every pickup and delivery instantly with live route updates, status alerts, and full order visibility for your fleet and partners.'
+                },
+                analytics: {
+                    title: 'Analytics Dashboard',
+                    description: 'Review sales trends, kitchen performance, and revenue insights in a single dashboard built for fast, data-driven decisions.'
+                },
+                payments: {
+                    title: 'Multiple Payments',
+                    description: 'Manage payments, settlements, and partner commissions with secure multi-channel billing and faster payout flows.'
+                }
+            };
+            const detail = config[feature];
+            if (!detail) return;
+            document.querySelectorAll('#feature-tracking, #feature-analytics, #feature-payments').forEach(card => card.classList.remove('selected'));
+            document.getElementById(`feature-${feature}`).classList.add('selected');
+            document.getElementById('feature-detail-title').innerText = detail.title;
+            document.getElementById('feature-detail-description').innerText = detail.description;
+            document.getElementById('feature-detail').style.display = 'block';
+        }
+
+        function toggleAuthMode() {
+            if (currentRole === 'admin') {
+                return showToast('Admin access is login only.', 'warning');
+            }
+            authMode = authMode === 'login' ? 'signup' : 'login';
+            if (authMode === 'login') { 
+                setLoginMethod('email');
+            }
+            updateAuthUI();
+            const subtitle = document.getElementById('auth-subtitle');
+            subtitle.classList.add('subtitle-shimmer');
+            setTimeout(() => subtitle.classList.remove('subtitle-shimmer'), 1000);
+        }
+
+        function updateAuthUI() {
+            const title = document.getElementById('auth-title');
+            const submit = document.getElementById('submit-btn');
+            const nameGrp = document.getElementById('name-group');
+            const addressGrp = document.getElementById('address-group');
+            const restaurantNameGrp = document.getElementById('restaurant-name-group');
+            const restaurantContactGrp = document.getElementById('restaurant-contact-group');
+            const restaurantCuisineGrp = document.getElementById('restaurant-cuisine-group');
+            const restaurantFssaiGrp = document.getElementById('restaurant-fssai-group');
+            const confirmGrp = document.getElementById('confirm-group');
+            const deliveryGrp = document.getElementById('delivery-group');
+            const deliveryNote = document.getElementById('delivery-note');
+            const toggleL = document.getElementById('toggle-link');
+            const toggleT = document.getElementById('toggle-text');
+
+            if (currentRole === 'admin') {
+                authMode = 'login';
+            }
+            if(authMode === 'login') {
+                title.innerText = `${roleLabels[currentRole]} Login`;
+                submit.innerText = currentRole === 'admin' ? 'Admin Sign In' : 'Authorize';
+                nameGrp.style.display = 'none';
+                addressGrp.style.display = 'none';
+                confirmGrp.style.display = 'none';
+                document.getElementById('forgot-password-wrapper').style.display = 'block';
+                document.getElementById('login-method-toggle').style.display = 'flex';
+                document.getElementById('email-group').style.display = 'block';
+                document.getElementById('phone-group').style.display = loginMethod === 'phone' ? 'block' : 'none';
+                document.getElementById('pass-group').style.display = 'block';
+                document.getElementById('otp-group').style.display = loginMethod === 'phone' ? 'block' : 'none';
+                deliveryGrp.style.display = 'none';
+                deliveryNote.style.display = 'none';
+                if (currentRole === 'admin') {
+                    toggleL.style.display = 'none';
+                    toggleT.innerText = 'Admin Portal Access';
+                } else {
+                    toggleL.style.display = 'inline';
+                    toggleT.innerText = 'First time in the Verse?';
+                    toggleL.innerText = 'Join Network';
+                }
+            } else {
+                title.innerText = currentRole === 'delivery' ? 'Delivery Partner Registration' : 'Network Registration';
+                submit.innerText = currentRole === 'customer' ? 'Sync Identity' : 'Request Access';
+                nameGrp.style.display = 'block';
+                addressGrp.style.display = 'block';
+                document.getElementById('phone-group').style.display = 'block';
+
+                if (currentRole === 'delivery') {
+                    confirmGrp.style.display = 'none';
+                    document.getElementById('pass-group').style.display = 'none';
+                    deliveryGrp.style.display = 'block';
+                    deliveryNote.style.display = 'block';
+                } else {
+                    confirmGrp.style.display = 'block';
+                    document.getElementById('pass-group').style.display = 'block';
+                    deliveryGrp.style.display = 'none';
+                    deliveryNote.style.display = 'none';
+                }
+
+                if (currentRole === 'restaurant') {
+                    restaurantNameGrp.style.display = 'block';
+                    restaurantContactGrp.style.display = 'block';
+                    restaurantCuisineGrp.style.display = 'block';
+                    restaurantFssaiGrp.style.display = 'block';
+                } else {
+                    restaurantNameGrp.style.display = 'none';
+                    restaurantContactGrp.style.display = 'none';
+                    restaurantCuisineGrp.style.display = 'none';
+                    restaurantFssaiGrp.style.display = 'none';
+                }
+
+                toggleT.innerText = 'Existing Identity?';
+                toggleL.innerText = 'Login to Verse';
+            }
+        }
+
+        function handleForgotPassword() {
+            const method = loginMethod;
+            let inputValue = '';
+            if (method === 'phone') {
+                inputValue = prompt('Enter your registered phone number to reset your password:');
+                if (!inputValue) return;
+                const phone = normalizePhone(inputValue);
+                if (!phone) return showToast('Enter a valid phone number.', 'error');
+                const users = JSON.parse(localStorage.getItem('fv_users') || '[]');
+                const user = users.find(u => normalizePhone(u.phone) === phone);
+                if (user) {
+                    showToast('Password reset SMS sent to your phone.', 'success');
+                } else {
+                    showToast('No account found for that phone number.', 'error');
+                }
+            } else {
+                inputValue = prompt('Enter your registered email address to reset your password:');
+                if (!inputValue) return;
+                const email = normalizeEmail(inputValue);
+                if (!email) return showToast('Enter a valid email address.', 'error');
+                const users = JSON.parse(localStorage.getItem('fv_users') || '[]');
+                const user = users.find(u => normalizeEmail(u.email) === email);
+                if (user) {
+                    showToast('Password recovery link sent to your email.', 'success');
+                } else {
+                    showToast('No account found for that email.', 'error');
+                }
+            }
+        }
+
+        function normalizeEmail(value) {
+            return value ? value.trim().toLowerCase() : '';
+        }
+
+        function normalizePhone(value) {
+            return value ? value.replace(/[^0-9]/g, '') : '';
+        }
+
+        function isAdminEmailPassword(email, password) {
+            return email === adminAccount.email && password === adminAccount.password;
+        }
+
+        function isAdminPhone(phone) {
+            return phone === adminAccount.phone;
+        }
+
+        async function handleAuth(e) {
+            e.preventDefault();
+            const email = normalizeEmail(document.getElementById('email').value);
+            const pass = document.getElementById('password').value;
+            const confirmPass = document.getElementById('confirm-password').value;
+            const name = document.getElementById('fullname').value.trim();
+            const phone = normalizePhone(document.getElementById('phone')?.value || '');
+            const address = document.getElementById('address').value.trim();
+            const vehicleType = document.getElementById('vehicle-type')?.value;
+            const vehicleNumber = document.getElementById('vehicle-number')?.value.trim();
+            const licenseNumber = document.getElementById('license-number')?.value.trim();
+            const rcUpload = document.getElementById('rc-upload')?.files[0]?.name || '';
+            const photoUpload = document.getElementById('photo-upload')?.files[0]?.name || '';
+
+            if (authMode === 'signup') {
+                const restaurantName = document.getElementById('restaurant-name')?.value.trim();
+                const restaurantContact = document.getElementById('restaurant-contact')?.value.trim();
+                const restaurantCuisine = document.getElementById('restaurant-cuisine')?.value;
+                const restaurantFssai = document.getElementById('restaurant-fssai')?.value.trim();
+
+                if (!name) return showToast('Enter your full name.', 'error');
+                if (!address) return showToast('Enter your address.', 'error');
+                if (!email) return showToast('Enter your email address.', 'error');
+
+                if (currentRole === 'customer') {
+                    if (!phone) return showToast('Enter your phone number.', 'error');
+                    if (!/^[0-9]{7,20}$/.test(phone)) return showToast('Enter a valid phone number.', 'error');
+                    if (!pass || !confirmPass) return showToast('Enter and confirm your password.', 'error');
+                    if (pass !== confirmPass) return showToast('Passwords do not match.', 'error');
+                    
+                    const user = {
+                        email: normalizeEmail(email),
+                        phone: normalizePhone(phone),
+                        password: pass,
+                        role: 'customer',
+                        name,
+                        address,
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    try {
+    const data = await apiFetch('/api/auth/register', {
+        method: 'POST',
+        body: {
+            role: 'customer',
+            email,
+            phone,
+            password: pass,
+            fullname: name,
+            address
+        }
+    });
+
+    const savedUser = {
+        ...data.user,
+        password: pass,
+        name: data.user.fullname || name,
+        role: 'customer',
+        email,
+        phone,
+        address
+    };
+
+    saveUser(savedUser);
+    showToast('Account created successfully. Logging in...', 'success');
+    shareLoginDetails(savedUser);
+
+} catch (error) {
+    showToast(error.message || 'Registration failed.', 'error');
+}
+                } else if (currentRole === 'restaurant') {
+                    if (!restaurantName) return showToast('Enter your restaurant name.', 'error');
+                    if (!restaurantContact) return showToast('Enter your contact number.', 'error');
+                    if (!/^[0-9]{7,20}$/.test(restaurantContact)) return showToast('Enter a valid contact number.', 'error');
+                    if (!restaurantCuisine) return showToast('Select your cuisine type.', 'error');
+                    if (!restaurantFssai) return showToast('Enter your FSSAI license number.', 'error');
+                    const password = pass || `MW-${Math.floor(100000 + Math.random() * 900000)}`;
+                    
+                    const restaurantRequest = {
+                        id: `R${Math.floor(1000 + Math.random() * 9000)}`,
+                        role: 'restaurant',
+                        name: restaurantName,
+                        fullname: name,
+                        owner: name,
+                        email,
+                        phone,
+                        password,
+                        restaurantName: restaurantName,
+                        restaurantContact: restaurantContact,
+                        restaurantCuisine: restaurantCuisine,
+                        restaurantFssai: restaurantFssai,
+                        city: address.split(',')[0] || address,
+                        rating: 4.5,
+                        revenue: 0,
+                        contact: restaurantContact,
+                        cuisine: restaurantCuisine,
+                        fssaiLicense: restaurantFssai,
+                        status: 'Pending',
+                        submittedAt: new Date().toISOString()
+                    };
+                    
+                    const pendingRequests = JSON.parse(localStorage.getItem('mad_pending_restaurants') || '[]');
+                    pendingRequests.push(restaurantRequest);
+                    localStorage.setItem('mad_pending_restaurants', JSON.stringify(pendingRequests));
+                    
+                    showToast('Kitchen partner request submitted successfully. Your application is now pending admin review.', 'success');
+                    authMode = 'login';
+                    updateAuthUI();
+                } else {
+                    if (!phone) return showToast('Enter your phone number.', 'error');
+                    if (!/^[0-9]{7,20}$/.test(phone)) return showToast('Enter a valid phone number.', 'error');
+                    if (currentRole === 'delivery') {
+                        if (!vehicleNumber) return showToast('Enter your vehicle number.', 'error');
+                        if (!licenseNumber) return showToast('Enter your driving license number.', 'error');
+                    }
+                    const generatedPassword = pass || `DL-${Math.floor(100000 + Math.random() * 900000)}`;
+                    try {
+                        const data = await apiFetch('/api/auth/register', {
+                            method: 'POST',
+                            body: {
+                                role: 'delivery',
+                                email,
+                                phone,
+                                password: generatedPassword,
+                                fullname: name,
+                                address,
+                                vehicleType,
+                                vehicleNumber,
+                                licenseNumber
+                            }
+                        });
+                        const user = {
+                            ...data.user,
+                            password: generatedPassword,
+                            role: 'delivery',
+                            vehicleType,
+                            vehicleNumber,
+                            licenseNumber
+                        };
+                        saveUser(user);
+                        showToast('Delivery partner submitted. Login once approved.', 'success');
+                        authMode = 'login';
+                        updateAuthUI();
+                    } catch (error) {
+                        showToast(error.message, 'error');
+                    }
+                }
+            } else {
+                const users = JSON.parse(localStorage.getItem('fv_users') || '[]');
+                if (loginMethod === 'phone') {
+                    if (!phone) return showToast('Enter your phone number.', 'error');
+                    if (!otpSent) return showToast('Send OTP first.', 'error');
+                    const enteredOtp = getEnteredOtp();
+                    if (enteredOtp.length !== 6) return showToast('Enter the full OTP.', 'error');
+                    if (enteredOtp !== generatedOtp) return showToast('Invalid OTP.', 'error');
+                    if (currentRole === 'admin' && isAdminPhone(phone)) {
+                        showToast('Admin access granted via phone OTP.', 'success');
+                        shareLoginDetails(adminAccount);
+                        return;
+                    }
+                    const user = users.find(u => normalizePhone(u.phone) === phone && u.role === currentRole);
+                    if (user) {
+                        showToast(`Access Granted, Agent ${user.name}`, 'success');
+                        shareLoginDetails(user);
+                    } else if (currentRole === 'restaurant') {
+                        // Check pending restaurant signup requests
+                        const pendingRestaurants = JSON.parse(localStorage.getItem('mad_pending_restaurants') || '[]');
+                        const pendingUser = pendingRestaurants.find(r => normalizePhone(r.phone) === phone);
+                        if (pendingUser) {
+                            if (pendingUser.status === 'Approved') {
+                                showToast('Welcome back! Your restaurant account is approved. Logging in...', 'success');
+                                shareLoginDetails(pendingUser);
+                            } else if (pendingUser.status === 'Pending') {
+                                showToast('Your restaurant application is still pending admin review.', 'info');
+                            } else if (pendingUser.status === 'Rejected') {
+                                showToast('Your restaurant application was rejected by admin.', 'error');
+                            }
+                        } else {
+                            showToast('Invalid phone OTP or account not found.', 'error');
+                        }
+                    } else {
+                        showToast('Invalid phone OTP or account not found.', 'error');
+                    }
+                } else {
+                    if (!email) return showToast('Enter your email address.', 'error');
+                    if (!pass) return showToast('Enter your password.', 'error');
+                    if (currentRole === 'admin' && isAdminEmailPassword(email, pass)) {
+                        showToast('Admin access granted.', 'success');
+                        shareLoginDetails(adminAccount);
+                        return;
+                    }
+                    try {
+                        const data = await apiFetch('/api/auth/login', {
+                            method: 'POST',
+                            body: {
+                                identifier: email,
+                                password: pass,
+                                role: currentRole
+                            }
+                        });
+                        const payload = {
+                            ...data.user,
+                            password: pass,
+                            role: currentRole,
+                            restaurantName: data.restaurant?.name || '',
+                            restaurantContact: data.restaurant?.contact_number || data.restaurant?.contact || '',
+                            restaurantCuisine: data.restaurant?.cuisine || '',
+                            restaurantFssai: data.restaurant?.fssai_license || '',
+                            vehicleType: data.delivery_partner?.vehicle_type || '',
+                            vehicleNumber: data.delivery_partner?.vehicle_number || '',
+                            licenseNumber: data.delivery_partner?.license_number || ''
+                        };
+                        saveUser(payload);
+                        shareLoginDetails(payload);
+                        showToast(`Access Granted, Agent ${payload.fullname || payload.email}`, 'success');
+                    } catch (error) {
+                        const user = users.find(u => normalizeEmail(u.email) === email && (u.password || '') === pass && u.role === currentRole);
+                        if (user) {
+                            showToast(`Access Granted, Agent ${user.name}`, 'success');
+                            shareLoginDetails(user);
+                        } else if (currentRole === 'restaurant') {
+                            // Check pending restaurant signup requests
+                            const pendingRestaurants = JSON.parse(localStorage.getItem('mad_pending_restaurants') || '[]');
+                            const pendingUser = pendingRestaurants.find(r => normalizeEmail(r.email) === email && r.password === pass);
+                            if (pendingUser) {
+                                if (pendingUser.status === 'Approved') {
+                                    showToast('Your restaurant account is approved. Logging in...', 'success');
+                                    shareLoginDetails(pendingUser);
+                                } else if (pendingUser.status === 'Pending') {
+                                    showToast('Your restaurant application is still pending admin review.', 'info');
+                                } else if (pendingUser.status === 'Rejected') {
+                                    showToast('Your restaurant application was rejected by admin.', 'error');
+                                }
+                            } else {
+                                showToast(error.message || 'Invalid email or password. Please check your details.', 'error');
+                            }
+                        } else {
+                            showToast(error.message || 'Invalid email or password. Please check your details.', 'error');
+                        }
+                    }
+                }
+            }
+        }
+
+        function simulateApproval(email, name, role, address, phone, password, deliveryData = {}) {
+            document.getElementById('approval-overlay').classList.add('active');
+            document.getElementById('approving').style.display = 'block';
+            document.getElementById('approved').style.display = 'none';
+
+            setTimeout(() => {
+                const pass = password || "FV-" + Math.floor(1000 + Math.random() * 9000);
+                document.getElementById('gen-pass').innerText = pass;
+                document.getElementById('approving').style.display = 'none';
+                document.getElementById('approved').style.display = 'block';
+                const user = {
+                    email: normalizeEmail(email),
+                    phone: normalizePhone(phone),
+                    name,
+                    role,
+                    address,
+                    password: pass,
+                    ...deliveryData
+                };
+                saveUser(user);
+                currentUser = user;
+            }, 3000);
+        }
+
+        function saveUser(u) {
+            const users = JSON.parse(localStorage.getItem('fv_users') || '[]');
+            users.push({
+                ...u,
+                email: normalizeEmail(u.email),
+                phone: normalizePhone(u.phone),
+            });
+            localStorage.setItem('fv_users', JSON.stringify(users));
+        }
+
+        function getDestinationForRole(role) {
+            if (role === 'restaurant') return 'Restaurant.html';
+            if (role === 'admin') return 'admin1 (1).html';
+            return 'newone.html';
+        }
+
+        function shareLoginDetails(user) {
+            const role = user.role || currentRole || 'customer';
+            const profile = {
+                name: user.name || user.fullName || (user.email ? user.email.split('@')[0] : ''),
+                email: normalizeEmail(user.email || ''),
+                phone: normalizePhone(user.phone || ''),
+                role,
+                password: user.password || '',
+                address: user.address || '',
+                restaurantName: user.restaurantName || '',
+                restaurantContact: user.restaurantContact || '',
+                restaurantCuisine: user.restaurantCuisine || '',
+                restaurantFssai: user.restaurantFssai || '',
+                source: 'newlogin'
+            };
+            localStorage.setItem('mad_login_payload', JSON.stringify(profile));
+            if (profile.name) localStorage.setItem('profile_name', profile.name);
+            if (profile.email) localStorage.setItem('profile_email', profile.email);
+            if (profile.phone) localStorage.setItem('profile_phone', profile.phone);
+            if (profile.address) {
+                localStorage.setItem('mad_home_address', profile.address);
+                localStorage.setItem('mad_home_lat', profile.latitude || '');
+                localStorage.setItem('mad_home_lng', profile.longitude || '');
+            }
+            window.location.href = getDestinationForRole(role);
+        }
+
+        function enterDashboard(u) {
+            currentUser = u;
+            document.getElementById('db-user').innerText = `Welcome, Agent ${u.name.split(' ')[0]}`;
+            document.getElementById('db-role').innerText = `Neural Node: ${u.role}`;
+            
+            let stats = '';
+            if(u.role === 'customer') {
+                stats = `<div class="glass-card stat-box"><h3>Credits</h3><div class="value">840</div></div><div class="glass-card stat-box"><h3>Orders</h3><div class="value">14</div></div>`;
+            } else {
+                stats = `<div class="glass-card stat-box"><h3>Revenue</h3><div class="value">$2.4k</div></div><div class="glass-card stat-box"><h3>Rating</h3><div class="value">4.9</div></div>`;
+            }
+            document.getElementById('db-stats').innerHTML = stats;
+            document.getElementById('db-logs').innerHTML = `<p>⚡ Auth Sync @ ${new Date().toLocaleTimeString()}</p><p>🛰️ Location: Neo-Delhi Sector 4</p>`;
+            
+            initChart();
+            navigateTo('dashboard');
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('dbChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['T-4', 'T-3', 'T-2', 'T-1', 'Now'],
+                    datasets: [{ label: 'Performance', data: [10, 25, 45, 30, 60], borderColor: '#ff4d5a', backgroundColor: 'rgba(255, 77, 90, 0.15)', tension: 0.4, pointBackgroundColor: '#ff1b2e', pointBorderColor: '#fff', pointRadius: 5 }]
+                },
+                options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+            });
+        }
+
+        function closeApproval() {
+            document.getElementById('approval-overlay').classList.remove('active');
+            if (currentUser) {
+                const destination = getDestinationForRole(currentUser.role);
+                if (destination !== 'newone.html') {
+                    window.location.href = destination;
+                    return;
+                }
+            }
+            enterDashboard(currentUser);
+        }
+
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.background = type === 'success' ? 'linear-gradient(135deg, #00C853, #00e676)' : 'linear-gradient(135deg, #ff1b2e, #ff4d5a)';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function hideLoadingScreen() {
+            const loader = document.getElementById('loading-screen');
+            if (!loader) return;
+            loader.classList.add('hidden');
+            document.body.classList.remove('loading');
+            setTimeout(() => loader.remove(), 700);
+        }
+
+        window.addEventListener('load', () => {
+            setTimeout(hideLoadingScreen, 1400);
+        });
+
+        setTimeout(() => {
+            if (!document.body.classList.contains('loading')) return;
+            hideLoadingScreen();
+        }, 2400);
+
+        initTheme();
+    </script>
+
+    <script src="/js/madfood-integration.js"></script>
+</body></html>

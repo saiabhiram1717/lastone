@@ -1,0 +1,2 @@
+const r=require("express").Router(),c=require("../controllers/orderController"),{auth,allowRoles}=require("../middleware/auth");
+r.use(auth);r.post("/",allowRoles("customer"),c.createOrder);r.get("/",c.myOrders);r.get("/:id",c.getOrder);r.patch("/:id/status",allowRoles("customer","restaurant","delivery","admin"),c.updateStatus);r.patch("/:id/tracking",allowRoles("delivery","admin"),c.track);module.exports=r;

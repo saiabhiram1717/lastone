@@ -1,0 +1,1 @@
+const r=require("express").Router(),c=require("../controllers/adminController"),{auth,allowRoles}=require("../middleware/auth");r.use(auth,allowRoles("admin"));r.get("/dashboard",c.dashboard);r.get("/users",c.users);r.get("/restaurants",c.restaurants);r.patch("/restaurants/:id",c.approveRestaurant);r.get("/orders",c.orders);module.exports=r;

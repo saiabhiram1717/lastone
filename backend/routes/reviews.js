@@ -1,0 +1,1 @@
+const r=require("express").Router(),c=require("../controllers/reviewController"),{auth}=require("../middleware/auth");r.get("/restaurant/:restaurantId",c.list);r.post("/",auth,c.create);module.exports=r;

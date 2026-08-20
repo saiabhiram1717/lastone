@@ -1,0 +1,1 @@
+const r=require("express").Router(),c=require("../controllers/deliveryController"),{auth,allowRoles}=require("../middleware/auth");r.use(auth,allowRoles("delivery"));r.get("/available",c.available);r.patch("/:id/accept",c.accept);r.patch("/:id/status",c.updateStatus);module.exports=r;
