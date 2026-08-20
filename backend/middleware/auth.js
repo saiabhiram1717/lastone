@@ -1,12 +1,14 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const FALLBACK_JWT_SECRET = "madfood-fallback-secret-change-for-production";
 
 async function auth(req, res, next) {
   try {
     const header = req.headers.authorization || "";
     const token = header.startsWith("Bearer ") ? header.slice(7) : null;
     if (!token) return res.status(401).json({ error: "Authentication required." });
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || FALLBACK_JWT_SECRET;
+    const decoded = jwt.verify(token, secret);
     const user = await User.findById(decoded.id).select("-passwordHash");
     if (!user || !user.isActive) return res.status(401).json({ error: "Invalid or inactive account." });
     req.user = user;

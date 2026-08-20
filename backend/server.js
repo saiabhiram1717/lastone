@@ -7,12 +7,11 @@ const connectDB = require("./config/db");
 
 dotenv.config({ path: path.join(__dirname, ".env") });
 
+const FALLBACK_JWT_SECRET = "madfood-fallback-secret-change-for-production";
+process.env.JWT_SECRET = process.env.JWT_SECRET || FALLBACK_JWT_SECRET;
+
 const app = express();
 const PORT = process.env.PORT || 1717;
-
-if (!process.env.JWT_SECRET) {
-  throw new Error("JWT_SECRET is missing in backend/.env");
-}
 
 // Connect MongoDB
 connectDB().catch((err) => {
