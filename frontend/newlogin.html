@@ -781,6 +781,9 @@
         }
 
         async function apiFetch(url, options = {}) {
+            const apiBase = window.location.port === '1717'
+                ? ''
+                : 'http://localhost:1717';
             const fetchOptions = {
                 method: options.method || 'GET',
                 headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
@@ -789,7 +792,7 @@
                 fetchOptions.body = JSON.stringify(options.body);
             }
 
-            const res = await fetch(url, fetchOptions);
+            const res = await fetch(`${apiBase}${url}`, fetchOptions);
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
                 throw new Error(data.error || 'Server request failed.');

@@ -5,10 +5,14 @@ const path = require("path");
 
 const connectDB = require("./config/db");
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 const PORT = process.env.PORT || 1717;
+
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET is missing in backend/.env");
+}
 
 // Connect MongoDB
 connectDB().catch((err) => {
