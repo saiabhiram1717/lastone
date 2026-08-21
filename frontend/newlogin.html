@@ -780,14 +780,16 @@
             document.querySelectorAll('.otp-input').forEach(input => input.value = '');
         }
 
-        async function apiFetch(url, options = {}) {
-            const apiBase = window.location.port === '1717'
-                ? ''
-                : 'http://localhost:1717';
-            const fetchOptions = {
-                method: options.method || 'GET',
-                headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
-            };
+       async function apiFetch(url, options = {}) {
+    const apiBase = 'https://lastone-61a4.onrender.com';
+
+    const fetchOptions = {
+        method: options.method || 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {})
+        }
+    };
             if (options.body) {
                 fetchOptions.body = JSON.stringify(options.body);
             }
