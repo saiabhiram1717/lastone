@@ -1057,36 +1057,44 @@
                     if (!restaurantFssai) return showToast('Enter your FSSAI license number.', 'error');
                     const password = pass || `MW-${Math.floor(100000 + Math.random() * 900000)}`;
                     
-                    const restaurantRequest = {
-                        id: `R${Math.floor(1000 + Math.random() * 9000)}`,
-                        role: 'restaurant',
-                        name: restaurantName,
-                        fullname: name,
-                        owner: name,
-                        email,
-                        phone,
-                        password,
-                        restaurantName: restaurantName,
-                        restaurantContact: restaurantContact,
-                        restaurantCuisine: restaurantCuisine,
-                        restaurantFssai: restaurantFssai,
-                        city: address.split(',')[0] || address,
-                        rating: 4.5,
-                        revenue: 0,
-                        contact: restaurantContact,
-                        cuisine: restaurantCuisine,
-                        fssaiLicense: restaurantFssai,
-                        status: 'Pending',
-                        submittedAt: new Date().toISOString()
-                    };
-                    
-                    const pendingRequests = JSON.parse(localStorage.getItem('mad_pending_restaurants') || '[]');
-                    pendingRequests.push(restaurantRequest);
-                    localStorage.setItem('mad_pending_restaurants', JSON.stringify(pendingRequests));
-                    
-                    showToast('Kitchen partner request submitted successfully. Your application is now pending admin review.', 'success');
-                    authMode = 'login';
-                    updateAuthUI();
+                   try {
+    const data = await apiFetch('/api/auth/register', {
+        method: 'POST',
+        body: {
+            role: 'restaurant',
+            email,
+            phone: restaurantContact,
+            password,
+            fullname: name || restaurantName,
+            address: address || '',
+            restaurantName,
+            restaurantContact,
+            cuisine: restaurantCuisine,
+            fssai_license: restaurantFssai
+        }
+    });
+
+    if (window.madfoodSetSession) {
+        window.madfoodSetSession(data);
+    }
+
+    if (data.restaurant) {
+        localStorage.setItem(
+            'mad_restaurant',
+            JSON.stringify(data.restaurant)
+        );
+    }
+
+    showToast('Restaurant account created successfully!', 'success');
+
+    setTimeout(() => {
+        window.location.href = 'Restaurant.html';
+    }, 700);
+
+} catch (error) {
+    console.error(error);
+    showToast(error.message || 'Restaurant registration failed.', 'error');
+}
                 } else {
                     if (!phone) return showToast('Enter your phone number.', 'error');
                     if (!/^[0-9]{7,20}$/.test(phone)) return showToast('Enter a valid phone number.', 'error');
