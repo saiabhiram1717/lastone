@@ -3275,10 +3275,8 @@
                                 <button class="btn btn-secondary" onclick="applyCoupon()" data-i18n="cart.applyBtn">Apply</button>
                             </div>
                             <div id="coupon-message" class="coupon-message"></div>
-                            <div class="available-coupons">
+                            <div class="available-coupons" id="available-coupons">
                                 <small data-i18n="cart.available">Available: </small>
-                                <span class="coupon-tag" onclick="fillCouponInput('MADFOOD10')">MADFOOD10</span>
-                                <span class="coupon-tag" onclick="fillCouponInput('WELCOME20')">WELCOME20</span>
                             </div>
                         </div>
                         <hr />
@@ -5153,6 +5151,41 @@
         // ==========================================================================
         // COUPON
         // ==========================================================================
+        function getAvailableCoupons() {
+            const fallback = [
+                { code: 'MADFOOD10', discount: '10%', status: 'Active' },
+                { code: 'WELCOME20', discount: '20%', status: 'Active' }
+            ];
+            try {
+                const saved = JSON.parse(localStorage.getItem('madFoodsDemo') || '{}');
+                const coupons = Array.isArray(saved.coupons) ? saved.coupons : [];
+                return coupons.length
+                    ? coupons.filter(coupon => coupon.code && coupon.status === 'Active')
+                    : fallback;
+            } catch (error) {
+                return fallback;
+            }
+        }
+
+        function renderAvailableCoupons() {
+            const container = document.getElementById('available-coupons');
+            if (!container) return;
+            const label = container.querySelector('small');
+            container.innerHTML = '';
+            if (label) container.appendChild(label);
+            getAvailableCoupons().forEach(coupon => {
+                const tag = document.createElement('span');
+                tag.className = 'coupon-tag';
+                tag.textContent = coupon.code;
+                tag.onclick = () => fillCouponInput(coupon.code);
+                container.appendChild(tag);
+            });
+        }
+
+        window.addEventListener('storage', event => {
+            if (event.key === 'madFoodsDemo') renderAvailableCoupons();
+        });
+
         function fillCouponInput(code) {
             document.getElementById('coupon-input').value = code;
             applyCoupon();
@@ -5166,21 +5199,22 @@
 
         function applyCouponCode(code) {
             const msgEl = document.getElementById('coupon-message');
-            const valid = {
-                'MADFOOD10': { discount: 10, message: '10% off applied!' },
-                'WELCOME20': { discount: 20, message: '20% off applied!' }
-            };
-            if (valid[code]) {
-                appliedCoupon = valid[code];
+            const coupon = getAvailableCoupons().find(item => item.code.toUpperCase() === code);
+            const discountMatch = coupon && String(coupon.discount).match(/(\d+(?:\.\d+)?)\s*%/);
+            if (discountMatch) {
+                appliedCoupon = {
+                    discount: parseFloat(discountMatch[1]),
+                    message: `${coupon.discount} off applied!`
+                };
                 msgEl.textContent = `✅ ${appliedCoupon.message}`;
                 msgEl.className = 'coupon-message success';
                 showToast(`Coupon ${code} applied successfully!`, 'success', 2000);
                 updateCartUIState();
             } else {
                 appliedCoupon = null;
-                msgEl.textContent = '❌ Invalid coupon code';
+                msgEl.textContent = coupon ? '❌ This coupon is not a percentage discount' : '❌ Invalid coupon code';
                 msgEl.className = 'coupon-message error';
-                showToast('Invalid coupon code', 'error', 2000);
+                showToast(coupon ? 'This coupon is not a percentage discount' : 'Invalid coupon code', 'error', 2000);
                 updateCartUIState();
             }
         }
@@ -7235,6 +7269,7 @@
             } else {
                 applyLanguage('en');
             }
+            renderAvailableCoupons();
             document.getElementById('damage-photo').addEventListener('change', function(e) {
                 const preview = document.getElementById('damage-photo-preview');
                 preview.innerHTML = '';
