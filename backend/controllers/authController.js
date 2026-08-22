@@ -178,7 +178,6 @@ async function register(req, res) {
                     fssaiLicense ||
                     "",
 
-                // Auto-approve restaurants for development
                 status: "Pending"
             });
 
@@ -267,13 +266,9 @@ async function login(req, res) {
 
 
         const user = await User.findOne({
-
-            ...q,
-
-            ...(role
-                ? { role }
-                : {})
-        });
+  ...q,
+  ...(role ? { role } : {})
+}).select('+passwordHash');
 
 
         if (
@@ -299,6 +294,15 @@ async function login(req, res) {
             });
         }
 
+        if (user.role === "restaurant") {
+            const restaurantAccount = await Restaurant.findOne({ owner: user._id });
+            if (!restaurantAccount || restaurantAccount.status !== "Approved") {
+                return res.status(403).json({
+                    error: "Restaurant account is awaiting admin approval."
+                });
+            }
+        }
+
 
         user.lastLoginAt = new Date();
 
@@ -308,25 +312,13 @@ async function login(req, res) {
         let restaurant = null;
 
 
-       if (user.role === "restaurant") {
+        if (user.role === "restaurant") {
 
-    restaurant =
-        await Restaurant.findOne({
-            owner: user._id
-        });
-
-    if (!restaurant) {
-        return res.status(403).json({
-            error: "Restaurant account not found."
-        });
-    }
-
-    if (restaurant.status !== "Approved") {
-        return res.status(403).json({
-            error: "Restaurant account is pending admin approval."
-        });
-    }
-}
+            restaurant =
+                await Restaurant.findOne({
+                    owner: user._id
+                });
+        }
 
 
         return res.json({
