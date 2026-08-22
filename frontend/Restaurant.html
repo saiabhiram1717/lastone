@@ -3389,24 +3389,29 @@
         }
 
        async function savePendingRestaurant(request) {
-    const data = await apiFetch('/api/auth/register', {
-        method: 'POST',
-        body: {
-            role: 'restaurant',
-            fullname: request.ownerName || request.name,
-            email: request.email,
-            phone: request.phone,
-            password: request.password,
-            restaurantName: request.restaurantName,
-            cuisine: request.cuisine,
-            address: request.address,
-            restaurantContact: request.restaurantContact,
-            fssaiLicense: request.fssaiLicense
-        }
-    });
+   const data = await apiFetch('/api/auth/login', {
+    method: 'POST',
+    body: {
+        identifier: email,
+        password,
+        role: 'restaurant'
+    }
+});
 
-    return data;
+// Block pending restaurants
+if (
+    data.restaurant &&
+    data.restaurant.status &&
+    data.restaurant.status !== 'Approved'
+) {
+    showToast(
+        'Your restaurant account is waiting for Admin approval.',
+        'error'
+    );
+    return;
 }
+       }
+
 
         function findPendingRestaurantByEmail(email) {
             const target = normalizeEmail(email);
@@ -3440,52 +3445,6 @@
             if (!email || !password) {
                 showToast('Please enter email and password.', 'error');
                 return;
-            }
-
-            const pendingRequest = findPendingRestaurantByEmail(email);
-            if (pendingRequest) {
-                if (pendingRequest.status === 'Pending') {
-                    showToast('Your restaurant application is still pending admin approval.', 'info');
-                    return;
-                }
-                if (pendingRequest.status === 'Rejected') {
-                    showToast('Your restaurant application was rejected by admin.', 'error');
-                    return;
-                }
-                if (pendingRequest.status === 'Approved') {
-                    if (pendingRequest.password !== password) {
-                        showToast('Invalid email or password. Please try again.', 'error');
-                        return;
-                    }
-                    const payload = {
-                        ...pendingRequest,
-                        role: 'restaurant',
-                        restaurantName: pendingRequest.restaurantName || pendingRequest.name || '',
-                        restaurantContact: pendingRequest.restaurantContact || pendingRequest.phone || '',
-                        restaurantCuisine: pendingRequest.restaurantCuisine || pendingRequest.cuisine || 'Multi-Cuisine',
-                        restaurantFssai: pendingRequest.restaurantFssai || pendingRequest.fssaiLicense || '',
-                        name: pendingRequest.fullname || pendingRequest.name || pendingRequest.restaurantName || ''
-                    };
-                    localStorage.setItem('mad_login_payload', JSON.stringify(payload));
-                    showToast('Login successful! Welcome to MadFood Hub.', '✅');
-                    document.getElementById('authGateway').classList.remove('show');
-                    document.getElementById('app-container').classList.add('visible');
-                    loadRestaurantPayload();
-                    renderAll();
-                    switchView('dashboard');
-                    setTimeout(function() {
-                        initAllCharts();
-                        renderCalendar();
-                        renderTickets();
-                        renderRegisteredRestaurants();
-                        highlightNav('dashboard');
-                    }, 400);
-                    updateSidebarName(settingsState.restaurantName);
-                    updateDropdownName(settingsState.ownerName, settingsState.email);
-                    loadSettings();
-                    renderRestaurantProfileDetails();
-                    return;
-                }
             }
 
             try {
