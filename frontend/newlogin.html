@@ -1207,12 +1207,14 @@
                         shareLoginDetails(payload);
                         showToast(`Access Granted, Agent ${payload.fullname || payload.email}`, 'success');
                     } catch (error) {
+                        if (currentRole === 'restaurant') {
+                            showToast(error.message || 'Your account is waiting for admin approval.', 'error');
+                            return;
+                        }
                         const user = users.find(u => normalizeEmail(u.email) === email && (u.password || '') === pass && u.role === currentRole);
                         if (user) {
                             showToast(`Access Granted, Agent ${user.name}`, 'success');
                             shareLoginDetails(user);
-                        } else if (currentRole === 'restaurant') {
-                            showToast(error.message || 'Restaurant login failed. Please check your email and password.', 'error');
                         } else {
                             showToast(error.message || 'Invalid email or password. Please check your details.', 'error');
                         }
