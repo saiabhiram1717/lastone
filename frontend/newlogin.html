@@ -1055,46 +1055,56 @@
                     if (!/^[0-9]{7,20}$/.test(restaurantContact)) return showToast('Enter a valid contact number.', 'error');
                     if (!restaurantCuisine) return showToast('Select your cuisine type.', 'error');
                     if (!restaurantFssai) return showToast('Enter your FSSAI license number.', 'error');
-                    const password = pass || `MW-${Math.floor(100000 + Math.random() * 900000)}`;
-                    
-                   try {
-    const data = await apiFetch('/api/auth/register', {
-        method: 'POST',
-        body: {
-            role: 'restaurant',
-            email,
-            phone: restaurantContact,
-            password,
-            fullname: name || restaurantName,
-            address: address || '',
-            restaurantName,
-            restaurantContact,
-            cuisine: restaurantCuisine,
-            fssai_license: restaurantFssai
-        }
-    });
+                    if (!pass || !confirmPass) return showToast('Enter and confirm your password.', 'error');
+                    if (pass !== confirmPass) return showToast('Passwords do not match.', 'error');
 
-    if (window.madfoodSetSession) {
-        window.madfoodSetSession(data);
-    }
+                    try {
+                        const data = await apiFetch('/api/auth/register', {
+                            method: 'POST',
+                            body: {
+                                role: 'restaurant',
+                                email,
+                                phone,
+                                password: pass,
+                                fullname: name,
+                                address,
+                                restaurantName,
+                                restaurantContact,
+                                cuisine: restaurantCuisine,
+                                fssai_license: restaurantFssai
+                            }
+                        });
 
-    if (data.restaurant) {
-        localStorage.setItem(
-            'mad_restaurant',
-            JSON.stringify(data.restaurant)
-        );
-    }
+                        const savedUser = {
+                            ...(data.user || {}),
+                            name: data.user?.fullname || name,
+                            fullname: data.user?.fullname || name,
+                            email,
+                            phone,
+                            password: pass,
+                            role: 'restaurant',
+                            address,
+                            restaurantName: data.restaurant?.name || restaurantName,
+                            restaurantContact: data.restaurant?.contact_number || restaurantContact,
+                            restaurantCuisine: data.restaurant?.cuisine || restaurantCuisine,
+                            restaurantFssai: data.restaurant?.fssai_license || restaurantFssai
+                        };
 
-    showToast('Restaurant account created successfully!', 'success');
+                        if (data.token && window.madfoodSetSession) {
+                            window.madfoodSetSession(data);
+                        }
 
-    setTimeout(() => {
-        window.location.href = 'Restaurant.html';
-    }, 700);
+                        saveUser(savedUser);
+                        if (data.restaurant) {
+                            localStorage.setItem('mad_restaurant', JSON.stringify(data.restaurant));
+                        }
 
-} catch (error) {
-    console.error(error);
-    showToast(error.message || 'Restaurant registration failed.', 'error');
-}
+                        showToast('Restaurant account created successfully. Logging in...', 'success');
+                        shareLoginDetails(savedUser);
+                    } catch (error) {
+                        console.error('Restaurant registration error:', error);
+                        showToast(error.message || 'Restaurant registration failed.', 'error');
+                    }
                 } else {
                     if (!phone) return showToast('Enter your phone number.', 'error');
                     if (!/^[0-9]{7,20}$/.test(phone)) return showToast('Enter a valid phone number.', 'error');
@@ -1152,21 +1162,7 @@
                         showToast(`Access Granted, Agent ${user.name}`, 'success');
                         shareLoginDetails(user);
                     } else if (currentRole === 'restaurant') {
-                        // Check pending restaurant signup requests
-                        const pendingRestaurants = JSON.parse(localStorage.getItem('mad_pending_restaurants') || '[]');
-                        const pendingUser = pendingRestaurants.find(r => normalizePhone(r.phone) === phone);
-                        if (pendingUser) {
-                            if (pendingUser.status === 'Approved') {
-                                showToast('Welcome back! Your restaurant account is approved. Logging in...', 'success');
-                                shareLoginDetails(pendingUser);
-                            } else if (pendingUser.status === 'Pending') {
-                                showToast('Your restaurant application is still pending admin review.', 'info');
-                            } else if (pendingUser.status === 'Rejected') {
-                                showToast('Your restaurant application was rejected by admin.', 'error');
-                            }
-                        } else {
-                            showToast('Invalid phone OTP or account not found.', 'error');
-                        }
+                        showToast('Restaurant phone OTP login is not connected to the database. Use your registered email and password.', 'info');
                     } else {
                         showToast('Invalid phone OTP or account not found.', 'error');
                     }
@@ -1208,21 +1204,7 @@
                             showToast(`Access Granted, Agent ${user.name}`, 'success');
                             shareLoginDetails(user);
                         } else if (currentRole === 'restaurant') {
-                            // Check pending restaurant signup requests
-                            const pendingRestaurants = JSON.parse(localStorage.getItem('mad_pending_restaurants') || '[]');
-                            const pendingUser = pendingRestaurants.find(r => normalizeEmail(r.email) === email && r.password === pass);
-                            if (pendingUser) {
-                                if (pendingUser.status === 'Approved') {
-                                    showToast('Your restaurant account is approved. Logging in...', 'success');
-                                    shareLoginDetails(pendingUser);
-                                } else if (pendingUser.status === 'Pending') {
-                                    showToast('Your restaurant application is still pending admin review.', 'info');
-                                } else if (pendingUser.status === 'Rejected') {
-                                    showToast('Your restaurant application was rejected by admin.', 'error');
-                                }
-                            } else {
-                                showToast(error.message || 'Invalid email or password. Please check your details.', 'error');
-                            }
+                            showToast(error.message || 'Restaurant login failed. Please check your email and password.', 'error');
                         } else {
                             showToast(error.message || 'Invalid email or password. Please check your details.', 'error');
                         }
