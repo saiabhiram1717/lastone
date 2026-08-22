@@ -431,6 +431,22 @@
             border-color: var(--brand);
         }
 
+        .btn-delete {
+            color: #b42318;
+            background: #fff5f4;
+            border: 1px solid #fecdca;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-delete:hover {
+            color: #ffffff;
+            background: #b42318;
+            border-color: #b42318;
+        }
+
         .btn.success {
             color: white;
             background: var(--success);
@@ -1581,7 +1597,7 @@
             coupons: {
                 title: "Coupon Management",
                 subtitle: "Create and monitor offers, campaigns and coupon usage.",
-                render: () => tablePage("Coupons", data.coupons, ["code", "type", "discount", "used", "status"])
+                render: () => tablePage("Coupons", data.coupons, ["code", "type", "discount", "startDate", "endDate", "used", "status"], true)
             },
             analytics: {
                 title: "Revenue Analytics",
@@ -2364,7 +2380,7 @@
             // Chat and call buttons - using event delegation
         }
 
-        function tablePage(title, rows, keys) {
+        function tablePage(title, rows, keys, allowDelete = false) {
             $("#pageContent").innerHTML = `
         <div class="table-wrap">
             <div class="table-controls">
@@ -2375,7 +2391,7 @@
                 <button class="btn" data-action="filter">Filters</button>
                 <button class="btn primary" data-action="add">Add New</button>
             </div>
-            ${simpleTable(rows, keys)}
+            ${simpleTable(rows, keys, allowDelete)}
         </div>
     `;
 
@@ -2393,7 +2409,7 @@
             }
         }
 
-        function simpleTable(rows, keys) {
+        function simpleTable(rows, keys, allowDelete = false) {
             if (!rows || !rows.length) {
                 return `<p class="muted" style="padding:16px;">No data available</p>`;
             }
@@ -2403,12 +2419,14 @@
             <thead>
                 <tr>
                     ${keys.map(key => `<th>${formatTitle(key)}</th>`).join("")}
+                    ${allowDelete ? "<th>Actions</th>" : ""}
                 </tr>
             </thead>
             <tbody>
                 ${rows.map(row => `
                     <tr>
                         ${keys.map(key => `<td>${formatCell(row[key], key)}</td>`).join("")}
+                        ${allowDelete ? `<td><button class="btn-sm btn-delete delete-coupon-btn" data-coupon-index="${rows.indexOf(row)}" title="Delete coupon"><i class="fa-solid fa-trash"></i> Delete</button></td>` : ""}
                     </tr>
                 `).join("")}
             </tbody>
@@ -3180,6 +3198,20 @@
                     openAddPanel(type);
                 }
             });
+
+            document.addEventListener("click", function(e) {
+                const deleteBtn = e.target.closest(".delete-coupon-btn");
+                if (!deleteBtn) return;
+
+                const couponIndex = Number(deleteBtn.dataset.couponIndex);
+                const coupon = data.coupons[couponIndex];
+                if (!coupon || !confirm(`Delete coupon ${coupon.code}?`)) return;
+
+                data.coupons.splice(couponIndex, 1);
+                localStorage.setItem("madFoodsDemo", JSON.stringify(data));
+                loadPage("coupons");
+                showToast(`Coupon ${coupon.code} deleted!`);
+            });
         }
 
         function getRowsForPage(page) {
@@ -3298,6 +3330,8 @@
                         <input id="addCode" placeholder="Coupon code (e.g. SAVE50)">
                         <input id="addType" placeholder="Offer type (e.g. Festival Offer)">
                         <input id="addDiscount" placeholder="Discount (e.g. 50% or ₹100)">
+                        <label>Start date<input id="addStartDate" type="date"></label>
+                        <label>End date<input id="addEndDate" type="date"></label>
                         <input id="addUsed" placeholder="Times used" type="number" value="0">
                         <select id="addStatus">
                             <option value="Active">Active</option>
@@ -3460,16 +3494,28 @@
                     const code = document.getElementById("addCode").value.trim().toUpperCase();
                     const type = document.getElementById("addType").value.trim() || "Offer";
                     const discount = document.getElementById("addDiscount").value.trim() || "10%";
+                    const startDate = document.getElementById("addStartDate").value;
+                    const endDate = document.getElementById("addEndDate").value;
                     const used = parseInt(document.getElementById("addUsed").value) || 0;
                     const status = document.getElementById("addStatus").value;
                     if (!code) {
                         showToast("Please enter a coupon code");
                         return;
                     }
+                    if (!startDate || !endDate) {
+                        showToast("Please select a start and end date");
+                        return;
+                    }
+                    if (endDate < startDate) {
+                        showToast("End date must be on or after the start date");
+                        return;
+                    }
                     data.coupons.push({
                         code: code,
                         type: type,
                         discount: discount,
+                        startDate: startDate,
+                        endDate: endDate,
                         used: used,
                         status: status
                     });
