@@ -781,7 +781,9 @@
         }
 
        async function apiFetch(url, options = {}) {
-    const apiBase = 'https://lastone-61a4.onrender.com';
+    const apiBase = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+        ? 'http://localhost:1717'
+        : 'https://lastone-61a4.onrender.com';
 
     const fetchOptions = {
         method: options.method || 'GET',
@@ -1090,17 +1092,14 @@
                             restaurantFssai: data.restaurant?.fssai_license || restaurantFssai
                         };
 
-                        if (data.token && window.madfoodSetSession) {
-                            window.madfoodSetSession(data);
-                        }
-
                         saveUser(savedUser);
                         if (data.restaurant) {
                             localStorage.setItem('mad_restaurant', JSON.stringify(data.restaurant));
                         }
 
-                        showToast('Restaurant account created successfully. Logging in...', 'success');
-                        shareLoginDetails(savedUser);
+                        showToast('Registration successful. Your account is waiting for admin approval.', 'success');
+                        authMode = 'login';
+                        updateAuthUI();
                     } catch (error) {
                         console.error('Restaurant registration error:', error);
                         showToast(error.message || 'Restaurant registration failed.', 'error');
@@ -1170,8 +1169,17 @@
                     if (!email) return showToast('Enter your email address.', 'error');
                     if (!pass) return showToast('Enter your password.', 'error');
                     if (currentRole === 'admin' && isAdminEmailPassword(email, pass)) {
-                        showToast('Admin access granted.', 'success');
-                        shareLoginDetails(adminAccount);
+                        try {
+                            const data = await apiFetch('/api/auth/login', {
+                                method: 'POST',
+                                body: { identifier: email, password: pass, role: 'admin' }
+                            });
+                            if (window.madfoodSetSession) window.madfoodSetSession(data);
+                            showToast('Admin access granted.', 'success');
+                            shareLoginDetails({ ...adminAccount, ...data.user, role: 'admin' });
+                        } catch (error) {
+                            showToast(error.message || 'Admin login failed.', 'error');
+                        }
                         return;
                     }
                     try {
@@ -1350,5 +1358,5 @@
         initTheme();
     </script>
 
-    <script src="/js/madfood-integration.js"></script>
+    <script src="./js/madfood-integration.js"></script>
 </body></html>

@@ -2590,6 +2590,54 @@
             return stored;
         }
 
+        async function loadRestaurantData() {
+            const apiBase = ["localhost", "127.0.0.1"].includes(window.location.hostname)
+                ? "http://localhost:1717"
+                : "https://lastone-61a4.onrender.com";
+
+            try {
+                let token = localStorage.getItem("mad_token");
+                if (!token) {
+                    const loginResponse = await fetch(`${apiBase}/api/auth/login`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            identifier: "admin@madfood.com",
+                            password: "Admin@12345",
+                            role: "admin"
+                        })
+                    });
+                    if (!loginResponse.ok) throw new Error("Admin authentication required.");
+                    const loginData = await loginResponse.json();
+                    token = loginData.token;
+                    localStorage.setItem("mad_token", token);
+                    if (loginData.user) localStorage.setItem("mad_user", JSON.stringify(loginData.user));
+                }
+                const response = await fetch(`${apiBase}/api/admin/restaurants`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!response.ok) throw new Error("Unable to load restaurants.");
+                const result = await response.json();
+                data.restaurants = (result.restaurants || []).map(restaurant => ({
+                    ...restaurant,
+                    id: String(restaurant._id),
+                    owner: restaurant.owner?.fullname || "Unknown owner",
+                    email: restaurant.owner?.email || restaurant.email || "Not provided",
+                    phone: restaurant.owner?.phone || restaurant.contact_number || "Not provided",
+                    city: (restaurant.address || "").split(",")[0].trim() || "Unknown",
+                    rating: restaurant.rating || 0,
+                    revenue: restaurant.revenue || 0,
+                    status: restaurant.status || "Pending"
+                }));
+                localStorage.setItem("madFoodsDemo", JSON.stringify(data));
+                if (document.querySelector(".nav-link.active")?.dataset.page === "restaurants") {
+                    renderRestaurantApprovals();
+                }
+            } catch (error) {
+                console.warn("Restaurant data could not be refreshed:", error.message);
+            }
+        }
+
         let appData = normalizeApprovalData();
         Object.assign(data, appData);
 
@@ -2671,7 +2719,7 @@
             $("#docModal").classList.remove("active");
         }
 
-        function updateRequestStatus(type, id, status) {
+        async function updateRequestStatus(type, id, status) {
             const source = type === "restaurant" ? data.restaurants : data.partners;
             const item = source.find(row => row.id === id);
 
@@ -2680,6 +2728,26 @@
             }
 
             item.status = status;
+
+            if (type === "restaurant" && /^[a-f0-9]{24}$/i.test(String(id))) {
+                try {
+                    const apiBase = ["localhost", "127.0.0.1"].includes(window.location.hostname)
+                        ? "http://localhost:1717"
+                        : "https://lastone-61a4.onrender.com";
+                    const response = await fetch(`${apiBase}/api/admin/restaurants/${id}`, {
+                        method: "PATCH",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${localStorage.getItem("mad_token") || ""}`
+                        },
+                        body: JSON.stringify({ status })
+                    });
+                    if (!response.ok) throw new Error("Status update failed.");
+                } catch (error) {
+                    showToast("Restaurant status could not be saved.");
+                    return;
+                }
+            }
 
             // If it's a restaurant, also update the pending requests list
             if (type === "restaurant") {
@@ -2736,6 +2804,8 @@
                             <tr>
                                 <th>Restaurant</th>
                                 <th>Owner</th>
+                                <th>Login Email</th>
+                                <th>Phone</th>
                                 <th>City</th>
                                 <th>Rating</th>
                                 <th>Revenue</th>
@@ -2748,6 +2818,8 @@
                                 <tr>
                                     <td>${item.name}</td>
                                     <td>${item.owner}</td>
+                                    <td>${item.email || "Not provided"}</td>
+                                    <td>${item.phone || "Not provided"}</td>
                                     <td>${item.city}</td>
                                     <td>⭐ ${item.rating}</td>
                                     <td>₹${Number(item.revenue).toLocaleString("en-IN")}</td>
@@ -3675,6 +3747,7 @@
             initDelegatedEvents();
             initNotificationBell();
             initGlobalSearch();
+            loadRestaurantData();
         }
 
         // Override loadPage to handle dynamic buttons
