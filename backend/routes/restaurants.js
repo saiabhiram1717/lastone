@@ -1,1 +1,1 @@
-const r=require("express").Router(),c=require("../controllers/restaurantController"),{auth,allowRoles}=require("../middleware/auth");r.use(auth,allowRoles("restaurant"));r.get("/me",c.mine);r.put("/me",c.update);module.exports=r;
+const r=require("express").Router(),c=require("../controllers/restaurantController"),{auth,allowRoles}=require("../middleware/auth");r.get("/",c.approved);r.use(auth,allowRoles("restaurant"));r.get("/me",c.mine);r.put("/me",c.update);module.exports=r;

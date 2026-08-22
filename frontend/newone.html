@@ -4029,22 +4029,30 @@
         async function loadBackendCatalog() {
             try {
                 const restaurantResponse = await apiFetch('/api/restaurants');
-                if (restaurantResponse?.restaurants?.length) {
-                    RESTAURANT_INVENTORY = restaurantResponse.restaurants.map((r, index) => ({
+                if (Array.isArray(restaurantResponse?.restaurants)) {
+                    const approvedRestaurants = restaurantResponse.restaurants
+                        .filter(r => r.status === 'Approved')
+                        .map((r, index) => ({
                         id: r.id,
                         name: { en: r.name || `Restaurant ${index + 1}` },
-                        rate: 4.3,
-                        ratingsCount: `${Math.floor(200 + Math.random() * 1800)}`,
+                        rate: r.rating || 4.3,
+                        ratingsCount: r.ratingsCount || '0',
                         address: r.address || 'No address provided',
-                        timing: 'Open until 11:00 pm',
+                        timing: r.isOpen === false ? 'Currently closed' : 'Open until 11:00 pm',
                         chef: r.cuisine ? `Chef ${r.cuisine}` : 'Chef Partner',
-                        openingTime: '10:00 AM',
-                        closingTime: '11:00 PM',
-                        img: BACKEND_PLACEHOLDER_IMAGE,
+                        openingTime: r.openingTime || '10:00 AM',
+                        closingTime: r.closingTime || '11:00 PM',
+                        img: r.image_url || BACKEND_PLACEHOLDER_IMAGE,
                         reviews: [
                             { user: 'Happy Customer', rating: 5, comment: `Great ${r.cuisine || 'multi-cuisine'} options.` }
                         ]
                     }));
+                    const existingNames = new Set(RESTAURANT_DATA.map(r => r.name.en.toLowerCase()));
+                    RESTAURANT_INVENTORY = [
+                        ...RESTAURANT_DATA,
+                        ...approvedRestaurants.filter(r => !existingNames.has(r.name.en.toLowerCase()))
+                    ];
+                    renderMadanapalleHubs();
                 }
             } catch (error) {
                 console.warn('Backend restaurant fetch failed:', error.message || error);
@@ -4307,6 +4315,9 @@
         }
 
         async function apiFetch(url, options = {}) {
+            const apiBase = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+                ? 'http://localhost:1717'
+                : 'https://lastone-61a4.onrender.com';
             const fetchOptions = {
                 method: options.method || 'GET',
                 headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
@@ -4315,7 +4326,7 @@
                 fetchOptions.body = JSON.stringify(options.body);
             }
 
-            const res = await fetch(url, fetchOptions);
+            const res = await fetch(`${apiBase}${url}`, fetchOptions);
             let data;
             try {
                 data = await res.json();
@@ -4491,6 +4502,7 @@
                 renderMadanapalleHubs();
                 renderDynamicCatalog();
                 updateCartUIState();
+                loadBackendCatalog();
             } else {
                 if (authPortal) authPortal.style.display = 'flex';
                 if (mainApp) mainApp.classList.add('hidden');
@@ -4512,6 +4524,7 @@
             renderMadanapalleHubs();
             renderDynamicCatalog();
             updateCartUIState();
+            loadBackendCatalog();
             refreshDashboardSystem();
             setupButtonListeners();
             loadSavedProfileAddress();
@@ -4557,6 +4570,10 @@
             const grid = document.getElementById('restaurant-grid');
             if (!grid) return;
             grid.innerHTML = '';
+            if (!RESTAURANT_INVENTORY.length) {
+                grid.innerHTML = '<p class="empty-state">No approved restaurants are available yet.</p>';
+                return;
+            }
             RESTAURANT_INVENTORY.forEach((r) => {
                 const name = r.name[currentLanguage] || r.name.en;
                 const reviewsHtml = r.reviews.map(review => `

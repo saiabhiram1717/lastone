@@ -780,23 +780,16 @@
             document.querySelectorAll('.otp-input').forEach(input => input.value = '');
         }
 
-       async function apiFetch(url, options = {}) {
-    const apiBase = ['localhost', '127.0.0.1'].includes(window.location.hostname)
-        ? 'http://localhost:1717'
-        : 'https://lastone-61a4.onrender.com';
-
-    const fetchOptions = {
-        method: options.method || 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            ...(options.headers || {})
-        }
-    };
+        async function apiFetch(url, options = {}) {
+            const fetchOptions = {
+                method: options.method || 'GET',
+                headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
+            };
             if (options.body) {
                 fetchOptions.body = JSON.stringify(options.body);
             }
 
-            const res = await fetch(`${apiBase}${url}`, fetchOptions);
+            const res = await fetch(url, fetchOptions);
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
                 throw new Error(data.error || 'Server request failed.');
@@ -1021,89 +1014,47 @@
                         createdAt: new Date().toISOString()
                     };
                     
-                    try {
-    const data = await apiFetch('/api/auth/register', {
-        method: 'POST',
-        body: {
-            role: 'customer',
-            email,
-            phone,
-            password: pass,
-            fullname: name,
-            address
-        }
-    });
-
-    const savedUser = {
-        ...data.user,
-        password: pass,
-        name: data.user.fullname || name,
-        role: 'customer',
-        email,
-        phone,
-        address
-    };
-
-    saveUser(savedUser);
-    showToast('Account created successfully. Logging in...', 'success');
-    shareLoginDetails(savedUser);
-
-} catch (error) {
-    showToast(error.message || 'Registration failed.', 'error');
-}
+                    saveUser(user);
+                    showToast('Account created successfully. Logging in...', 'success');
+                    shareLoginDetails(user);
                 } else if (currentRole === 'restaurant') {
                     if (!restaurantName) return showToast('Enter your restaurant name.', 'error');
                     if (!restaurantContact) return showToast('Enter your contact number.', 'error');
                     if (!/^[0-9]{7,20}$/.test(restaurantContact)) return showToast('Enter a valid contact number.', 'error');
                     if (!restaurantCuisine) return showToast('Select your cuisine type.', 'error');
                     if (!restaurantFssai) return showToast('Enter your FSSAI license number.', 'error');
-                    if (!pass || !confirmPass) return showToast('Enter and confirm your password.', 'error');
-                    if (pass !== confirmPass) return showToast('Passwords do not match.', 'error');
-
-                    try {
-                        const data = await apiFetch('/api/auth/register', {
-                            method: 'POST',
-                            body: {
-                                role: 'restaurant',
-                                email,
-                                phone,
-                                password: pass,
-                                fullname: name,
-                                address,
-                                restaurantName,
-                                restaurantContact,
-                                cuisine: restaurantCuisine,
-                                fssai_license: restaurantFssai
-                            }
-                        });
-
-                        const savedUser = {
-                            ...(data.user || {}),
-                            name: data.user?.fullname || name,
-                            fullname: data.user?.fullname || name,
-                            email,
-                            phone,
-                            password: pass,
-                            role: 'restaurant',
-                            address,
-                            restaurantName: data.restaurant?.name || restaurantName,
-                            restaurantContact: data.restaurant?.contact_number || restaurantContact,
-                            restaurantCuisine: data.restaurant?.cuisine || restaurantCuisine,
-                            restaurantFssai: data.restaurant?.fssai_license || restaurantFssai
-                        };
-
-                        saveUser(savedUser);
-                        if (data.restaurant) {
-                            localStorage.setItem('mad_restaurant', JSON.stringify(data.restaurant));
-                        }
-
-                        showToast('Registration successful. Your account is waiting for admin approval.', 'success');
-                        authMode = 'login';
-                        updateAuthUI();
-                    } catch (error) {
-                        console.error('Restaurant registration error:', error);
-                        showToast(error.message || 'Restaurant registration failed.', 'error');
-                    }
+                    const password = pass || `MW-${Math.floor(100000 + Math.random() * 900000)}`;
+                    
+                    const restaurantRequest = {
+                        id: `R${Math.floor(1000 + Math.random() * 9000)}`,
+                        role: 'restaurant',
+                        name: restaurantName,
+                        fullname: name,
+                        owner: name,
+                        email,
+                        phone,
+                        password,
+                        restaurantName: restaurantName,
+                        restaurantContact: restaurantContact,
+                        restaurantCuisine: restaurantCuisine,
+                        restaurantFssai: restaurantFssai,
+                        city: address.split(',')[0] || address,
+                        rating: 4.5,
+                        revenue: 0,
+                        contact: restaurantContact,
+                        cuisine: restaurantCuisine,
+                        fssaiLicense: restaurantFssai,
+                        status: 'Pending',
+                        submittedAt: new Date().toISOString()
+                    };
+                    
+                    const pendingRequests = JSON.parse(localStorage.getItem('mad_pending_restaurants') || '[]');
+                    pendingRequests.push(restaurantRequest);
+                    localStorage.setItem('mad_pending_restaurants', JSON.stringify(pendingRequests));
+                    
+                    showToast('Kitchen partner request submitted successfully. Your application is now pending admin review.', 'success');
+                    authMode = 'login';
+                    updateAuthUI();
                 } else {
                     if (!phone) return showToast('Enter your phone number.', 'error');
                     if (!/^[0-9]{7,20}$/.test(phone)) return showToast('Enter a valid phone number.', 'error');
@@ -1161,7 +1112,21 @@
                         showToast(`Access Granted, Agent ${user.name}`, 'success');
                         shareLoginDetails(user);
                     } else if (currentRole === 'restaurant') {
-                        showToast('Restaurant phone OTP login is not connected to the database. Use your registered email and password.', 'info');
+                        // Check pending restaurant signup requests
+                        const pendingRestaurants = JSON.parse(localStorage.getItem('mad_pending_restaurants') || '[]');
+                        const pendingUser = pendingRestaurants.find(r => normalizePhone(r.phone) === phone);
+                        if (pendingUser) {
+                            if (pendingUser.status === 'Approved') {
+                                showToast('Welcome back! Your restaurant account is approved. Logging in...', 'success');
+                                shareLoginDetails(pendingUser);
+                            } else if (pendingUser.status === 'Pending') {
+                                showToast('Your restaurant application is still pending admin review.', 'info');
+                            } else if (pendingUser.status === 'Rejected') {
+                                showToast('Your restaurant application was rejected by admin.', 'error');
+                            }
+                        } else {
+                            showToast('Invalid phone OTP or account not found.', 'error');
+                        }
                     } else {
                         showToast('Invalid phone OTP or account not found.', 'error');
                     }
@@ -1169,17 +1134,8 @@
                     if (!email) return showToast('Enter your email address.', 'error');
                     if (!pass) return showToast('Enter your password.', 'error');
                     if (currentRole === 'admin' && isAdminEmailPassword(email, pass)) {
-                        try {
-                            const data = await apiFetch('/api/auth/login', {
-                                method: 'POST',
-                                body: { identifier: email, password: pass, role: 'admin' }
-                            });
-                            if (window.madfoodSetSession) window.madfoodSetSession(data);
-                            showToast('Admin access granted.', 'success');
-                            shareLoginDetails({ ...adminAccount, ...data.user, role: 'admin' });
-                        } catch (error) {
-                            showToast(error.message || 'Admin login failed.', 'error');
-                        }
+                        showToast('Admin access granted.', 'success');
+                        shareLoginDetails(adminAccount);
                         return;
                     }
                     try {
@@ -1207,14 +1163,26 @@
                         shareLoginDetails(payload);
                         showToast(`Access Granted, Agent ${payload.fullname || payload.email}`, 'success');
                     } catch (error) {
-                        if (currentRole === 'restaurant') {
-                            showToast(error.message || 'Your account is waiting for admin approval.', 'error');
-                            return;
-                        }
                         const user = users.find(u => normalizeEmail(u.email) === email && (u.password || '') === pass && u.role === currentRole);
                         if (user) {
                             showToast(`Access Granted, Agent ${user.name}`, 'success');
                             shareLoginDetails(user);
+                        } else if (currentRole === 'restaurant') {
+                            // Check pending restaurant signup requests
+                            const pendingRestaurants = JSON.parse(localStorage.getItem('mad_pending_restaurants') || '[]');
+                            const pendingUser = pendingRestaurants.find(r => normalizeEmail(r.email) === email && r.password === pass);
+                            if (pendingUser) {
+                                if (pendingUser.status === 'Approved') {
+                                    showToast('Your restaurant account is approved. Logging in...', 'success');
+                                    shareLoginDetails(pendingUser);
+                                } else if (pendingUser.status === 'Pending') {
+                                    showToast('Your restaurant application is still pending admin review.', 'info');
+                                } else if (pendingUser.status === 'Rejected') {
+                                    showToast('Your restaurant application was rejected by admin.', 'error');
+                                }
+                            } else {
+                                showToast(error.message || 'Invalid email or password. Please check your details.', 'error');
+                            }
                         } else {
                             showToast(error.message || 'Invalid email or password. Please check your details.', 'error');
                         }
@@ -1360,5 +1328,5 @@
         initTheme();
     </script>
 
-    <script src="./js/madfood-integration.js"></script>
+    <script src="/js/madfood-integration.js"></script>
 </body></html>
