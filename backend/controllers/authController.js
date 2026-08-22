@@ -179,7 +179,7 @@ async function register(req, res) {
                     "",
 
                 // Auto-approve restaurants for development
-                status: "Approved"
+                status: "Pending"
             });
 
 
@@ -308,13 +308,25 @@ async function login(req, res) {
         let restaurant = null;
 
 
-        if (user.role === "restaurant") {
+       if (user.role === "restaurant") {
 
-            restaurant =
-                await Restaurant.findOne({
-                    owner: user._id
-                });
-        }
+    restaurant =
+        await Restaurant.findOne({
+            owner: user._id
+        });
+
+    if (!restaurant) {
+        return res.status(403).json({
+            error: "Restaurant account not found."
+        });
+    }
+
+    if (restaurant.status !== "Approved") {
+        return res.status(403).json({
+            error: "Restaurant account is pending admin approval."
+        });
+    }
+}
 
 
         return res.json({
